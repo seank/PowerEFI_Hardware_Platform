@@ -16,6 +16,24 @@
       "revId": "c2342777aedeaa6fec6e511c4c3097179e43779f",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "946dac69_34ff449d",
+        "filename": "CMSIS/startup_gcc/newlib_stubs.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1013315
+      },
+      "writtenOn": "2018-03-03T02:48:53Z",
+      "side": 1,
+      "message": "Cool thanks for taking a look at all this!",
+      "parentUuid": "d38d77f3_7bb40c47",
+      "revId": "c2342777aedeaa6fec6e511c4c3097179e43779f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
