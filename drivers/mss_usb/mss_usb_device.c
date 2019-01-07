@@ -10,10 +10,10 @@
  * which includes initialization of MSS USB in device mode, USB standard request
  * handling, distribution of requests to specific class, interface or endpoints.
  *
- * V2.4 Internal Naming change. Cosmetic changes. Pointer copy instead of 
- * evaluating every time.     
- * V2.4 Naming convention change, other cosmetic changes. 
- * V2.4 DMA handling independent of host mode 
+ * V2.4 Internal Naming change. Cosmetic changes. Pointer copy instead of
+ * evaluating every time.
+ * V2.4 Naming convention change, other cosmetic changes.
+ * V2.4 DMA handling independent of host mode
  * V2.3 Added disconnect event handling.usbd_class_release called at disconnect
  * as well
  * V2.3 Added Vendor specific request handling
@@ -26,7 +26,7 @@
 #include "mss_usb_common_cif.h"
 #include "mss_usb_device_cif.h"
 #include "mss_usb_std_def.h"
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 
 #ifdef __cplusplus
 extern "C" {

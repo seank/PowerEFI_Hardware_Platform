@@ -1,8 +1,8 @@
 /*******************************************************************************
  * (c) Copyright 2009-2013 Microsemi SoC Products Group.  All rights reserved.
- * 
+ *
  * Stubs for Newlib system calls.
- *  
+ *
  * SVN $Revision: 6665 $
  * SVN $Date: 2014-07-03 16:56:22 +0100 (Thu, 03 Jul 2014) $
  */
@@ -37,9 +37,9 @@
  * Select which MMUART will be used for stdio and what baud rate will be used.
  * Default to 57600 baud if no baud rate is specified using the
  * MICROSEMI_STDIO_BAUD_RATE #define.
- */ 
+ */
 #ifdef MICROSEMI_STDIO_THRU_UART
-#include "../../drivers/mss_uart/mss_uart.h"
+#include "drivers/mss_uart/mss_uart.h"
 
 #ifndef MICROSEMI_STDIO_BAUD_RATE
 #define MICROSEMI_STDIO_BAUD_RATE  MSS_UART_115200_BAUD
@@ -173,7 +173,7 @@ int _read(int file, char *ptr, int len)
 
 /*==============================================================================
  * Write to a file. libc subroutines will use this system routine for output to
- * all files, including stdout—so if you need to generate any output, for
+ * all files, including stdoutï¿½so if you need to generate any output, for
  * example to a serial port for debugging, you should make your minimal write
  * capable of doing this.
  */
@@ -189,15 +189,15 @@ int _write_r( void * reent, int file, char * ptr, int len )
         MSS_UART_init(gp_my_uart,
                       MICROSEMI_STDIO_BAUD_RATE,
                       MSS_UART_DATA_8_BITS | MSS_UART_NO_PARITY);
-                      
+
         g_stdio_uart_init_done = 1;
     }
-    
+
     /*--------------------------------------------------------------------------
      * Output text to the UART.
      */
     MSS_UART_polled_tx(gp_my_uart, (uint8_t *)ptr, len);
-    
+
     return len;
 #else   /* MICROSEMI_STDIO_THRU_UART */
     return 0;
@@ -208,7 +208,7 @@ int _write_r( void * reent, int file, char * ptr, int len )
  * Increase program data space. As malloc and related functions depend on this,
  * it is useful to have a working implementation. The following suffices for a
  * standalone system; it exploits the symbol _end automatically defined by the
- * GNU linker. 
+ * GNU linker.
  */
 caddr_t _sbrk(int incr)
 {
@@ -216,14 +216,14 @@ caddr_t _sbrk(int incr)
     static char *heap_end;
     char *prev_heap_end;
     char * stack_ptr;
-    
+
     if (heap_end == 0)
     {
       heap_end = &_end;
     }
-    
+
     prev_heap_end = heap_end;
-    
+
     asm volatile ("MRS %0, msp" : "=r" (stack_ptr) );
     if(heap_end < stack_ptr)
     {
@@ -245,7 +245,7 @@ caddr_t _sbrk(int incr)
          * _eheap linker script symbol to figure out if there is room left on
          * the heap.
          * Please note that this use case makes sense when the stack is located
-         * in internal eSRAM in the 0x20000000 address range and the heap is 
+         * in internal eSRAM in the 0x20000000 address range and the heap is
          * located in the external memory in the 0xA0000000 memory range.
          * Please note that external memory should not be accessed using the
          * 0x00000000 memory range to read/write variables/data because of the
@@ -253,7 +253,7 @@ caddr_t _sbrk(int incr)
          */
         extern char _eheap;     /* Defined by the linker */
         char *top_of_heap;
-        
+
         top_of_heap = &_eheap;
         if(heap_end + incr  > top_of_heap)
         {
@@ -261,7 +261,7 @@ caddr_t _sbrk(int incr)
           _exit (1);
         }
     }
-  
+
     heap_end += incr;
     return (caddr_t) prev_heap_end;
 }

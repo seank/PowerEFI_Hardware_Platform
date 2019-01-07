@@ -7,9 +7,9 @@
  * SVN $Date: 2016-06-23 12:32:32 +0530 (Thu, 23 Jun 2016) $
  */
 
-#include "../../CMSIS/m2sxxx.h"
-#include "../../CMSIS/mss_assert.h"
-#include "../../CMSIS/system_m2sxxx.h"
+#include "CMSIS/m2sxxx.h"
+#include "CMSIS/mss_assert.h"
+#include "CMSIS/system_m2sxxx.h"
 #include "mss_nvm.h"
 
 #ifdef __cplusplus
@@ -40,7 +40,7 @@ extern "C" {
 #define NVM_TOP_OFFSET                  0x0007FFFFu
 
 #define NVM_BASE_ADDRESS                0x60000000u
-  
+
 #define PAGE_ADDR_MASK                  0xFFFFFF80u
 
 #define WD_WORD_SIZE                    32u
@@ -54,7 +54,7 @@ extern "C" {
                                             MSS_NVM_WVERIFY_FAIL | \
                                             MSS_NVM_PEFAIL_LOCK | \
                                             MSS_NVM_WR_DENIED)
-                                        
+
 #define NVM_FREQRNG_MASK                0xFFFFE01Fu
 #define NVM_FREQRNG_MAX                 ((uint32_t)0xFF << 5u)     /* FREQRNG is set to 15. */
 
@@ -63,7 +63,7 @@ extern "C" {
 
 /*******************************************************************************
  * Combined status definitions
- * Below definitions should be used to decoded the bit encoded status returned 
+ * Below definitions should be used to decoded the bit encoded status returned
  * by the function MSS_NVM_get_status().
  */
 #define MSS_NVM_BUSY_B                  (1u)                    /* NVM is performing an internal operation */
@@ -86,7 +86,7 @@ extern "C" {
 /**************************************************************************//**
  * Look-up table for NVM blocks.
  */
-static NVM_TypeDef * const g_nvm[] = 
+static NVM_TypeDef * const g_nvm[] =
 {
     ENVM_1,
     ENVM_2
@@ -102,8 +102,8 @@ static NVM32_TypeDef * const g_nvm32[] =
  * if eNVM write or No R/W protection is enabled
  */
 static uint8_t g_do_not_lock_page = OFF;
-        
-        
+
+
 /**************************************************************************/
 /* Private function declarations                                          */
 /**************************************************************************/
@@ -124,7 +124,7 @@ static void fill_wd_buffer
     uint32_t offset
 );
 
-static uint32_t 
+static uint32_t
 write_nvm
 (
     uint32_t addr,
@@ -157,13 +157,13 @@ NVM_write
     uint32_t initial_nvm_config;
 
     g_do_not_lock_page = OFF;
-    
-    /* 
-     * SAR 57547: Set the FREQRNG field of the eNVM configuration register 
-     * to its maximum value (i.e. 15) to ensure successful writes to eNVM. 
-     * Store the value of the eNVM configuration before updating it, so 
+
+    /*
+     * SAR 57547: Set the FREQRNG field of the eNVM configuration register
+     * to its maximum value (i.e. 15) to ensure successful writes to eNVM.
+     * Store the value of the eNVM configuration before updating it, so
      * that the prior configuration can be restored when the eNVM write
-     * operation has completed. 
+     * operation has completed.
      */
     initial_nvm_config = SYSREG->ENVM_CR;
     SYSREG->ENVM_CR = (initial_nvm_config & NVM_FREQRNG_MASK) | NVM_FREQRNG_MAX;
@@ -192,9 +192,9 @@ NVM_write
         }
 
         /* Ignore upper address bits to ignore remapping setting. */
-        nvm_offset = start_addr & NVM_OFFSET_SIGNIFICANT_BITS;  
-        
-        /* 
+        nvm_offset = start_addr & NVM_OFFSET_SIGNIFICANT_BITS;
+
+        /*
          * SAR 70908.
          * Check nvm offset is in protection or reserved area of eNVM
          */
@@ -202,35 +202,35 @@ NVM_write
 
         if(NVM_SUCCESS == status)
         {
-            /* 
-             * SAR 79545. 
+            /*
+             * SAR 79545.
              * If eNVM write or No R/W protected is enabled, then don't lock the page
              */
-            if((g_do_not_lock_page == ON)  && (NVM_LOCK_PAGE == lock_page)) 
+            if((g_do_not_lock_page == ON)  && (NVM_LOCK_PAGE == lock_page))
             {
                 lock_page = NVM_DO_NOT_LOCK_PAGE;
                 lock_status = NVM_PAGE_LOCK_WARNING;
             }
-            
+
             device_version = device_version & 0xFFFFu;
-            
+
             /* Don't lock pages of 090/150  device -eNVM1 memory */
             if((0xF807u == device_version) || (0xF806u == device_version))
             {
                 if(((nvm_offset >= NVM1_BOTTOM_OFFSET) || ((nvm_offset + length) > NVM1_BOTTOM_OFFSET))
-                            && (NVM_LOCK_PAGE == lock_page)) 
+                            && (NVM_LOCK_PAGE == lock_page))
                 {
                     lock_page = NVM_DO_NOT_LOCK_PAGE;
                     lock_status = NVM_PAGE_LOCK_WARNING;
                 }
             }
             /* Don't lock pages of 060 device */
-            else if((0xF808u == device_version) && (NVM_LOCK_PAGE == lock_page)) 
+            else if((0xF808u == device_version) && (NVM_LOCK_PAGE == lock_page))
             {
                 lock_page = NVM_DO_NOT_LOCK_PAGE;
                 lock_status = NVM_PAGE_LOCK_WARNING;
             }
-            
+
             /* Gain exclusive access to eNVM controller */
             status = get_ctrl_access(nvm_offset, length);
 
@@ -239,7 +239,7 @@ NVM_write
             {
                 uint32_t remaining_length = length;
                 uint32_t errors_and_warnings;
-                
+
                 while(remaining_length > 0u)
                 {
                     uint32_t length_written;
@@ -255,12 +255,12 @@ NVM_write
                     errors_and_warnings = nvm_hw_status & (WRITE_ERROR_MASK | MSS_NVM_WRCNT_OVER);
                     if(errors_and_warnings)
                     {
-                       /* 
+                       /*
                         * Ensure that the status returned by the NVM_write()
                         * function is NVM_WRITE_THRESHOLD_WARNING if at least one
                         * of the written eNVM pages indicate a write over
                         * threshold condition.
-                        */ 
+                        */
                         status = get_error_code(nvm_hw_status);
                     }
 
@@ -292,7 +292,7 @@ NVM_write
 
     /* Restore back to original value. */
     SYSREG->ENVM_CR = initial_nvm_config;
-    
+
     if((NVM_SUCCESS == status) && (NVM_PAGE_LOCK_WARNING == lock_status))
     {
         status = lock_status;
@@ -302,7 +302,7 @@ NVM_write
 
 /**************************************************************************//**
   Generate error code based on NVM status value.
-  
+
   The hardware nvm status passed as parameter is expected to be masked using the
   following mask:
                 (MSS_NVM_VERIFY_FAIL | \
@@ -311,12 +311,12 @@ NVM_write
                  MSS_NVM_PEFAIL_LOCK | \
                  MSS_NVM_WRCNT_OVER | \
                  MSS_NVM_WR_DENIED)
-  
+
  */
 static nvm_status_t get_error_code(uint32_t nvm_hw_status)
 {
     nvm_status_t status;
-    
+
     if(nvm_hw_status & MSS_NVM_WR_DENIED)
     {
         status = NVM_PROTECTION_ERROR;
@@ -338,7 +338,7 @@ static nvm_status_t get_error_code(uint32_t nvm_hw_status)
     {
         status = NVM_SUCCESS;
     }
-    
+
     return status;
 }
 
@@ -360,16 +360,16 @@ NVM_unlock
     uint32_t current_offset;
     uint32_t initial_nvm_config;
 
-    /* 
-     * SAR 57547: Set the FREQRNG field of the eNVM configuration register 
-     * to its maximum value (i.e. 15) to ensure successful writes to eNVM. 
-     * Store the value of the eNVM configuration before updating it, so 
+    /*
+     * SAR 57547: Set the FREQRNG field of the eNVM configuration register
+     * to its maximum value (i.e. 15) to ensure successful writes to eNVM.
+     * Store the value of the eNVM configuration before updating it, so
      * that the prior configuration can be restored when the eNVM write
-     * operation has completed. 
+     * operation has completed.
      */
     initial_nvm_config = SYSREG->ENVM_CR;
     SYSREG->ENVM_CR = (initial_nvm_config & NVM_FREQRNG_MASK) | NVM_FREQRNG_MAX;
-    
+
     /* Check input parameters */
     if((start_addr >= (NVM_BASE_ADDRESS + NVM_TOP_OFFSET)) ||
         ((start_addr >= NVM_TOP_OFFSET) &&
@@ -382,7 +382,7 @@ NVM_unlock
     {
         /* Ignore upper address bits to ignore remapping setting. */
         nvm_offset = start_addr & NVM_OFFSET_SIGNIFICANT_BITS;
-        
+
         /* Check nvm offset is in protection or reserved area of eNVM */
         status = check_protection_reserved_nvm(nvm_offset, length);
 
@@ -426,12 +426,12 @@ NVM_unlock
 
                     current_offset = (current_page << 0x7u);
                     p_nvm32 = (uint32_t *)(NVM_BASE_ADDRESS + current_offset);
-                     
+
                     for(inc = 0u; inc < WD_WORD_SIZE; ++inc)
                     {
                         g_nvm32[block]->WD[inc] = p_nvm32[inc];
                     }
-                    
+
                     g_nvm[block]->PAGE_LOCK = NVM_DO_NOT_LOCK_PAGE;
                     g_nvm[block]->CMD = USER_UNLOCK | (current_offset & PAGE_ADDR_MASK);
 
@@ -456,7 +456,7 @@ NVM_unlock
     }
     /* Restore back to original value. */
     SYSREG->ENVM_CR = initial_nvm_config;
-    
+
     return status;
 }
 
@@ -478,13 +478,13 @@ static nvm_status_t request_nvm_access(uint32_t nvm_block_id)
     nvm_status_t status = NVM_SUCCESS;
     volatile uint32_t timeout_counter;
     uint32_t access;
-    
+
     /*
      * Use the SystemCoreClock frequency to compute a delay counter value giving
      * us a delay in the 500ms range. This is a very approximate delay.
      */
     timeout_counter = SystemCoreClock / 16u;
-    
+
     /*
      * Gain access to eNVM controller.
      */
@@ -505,7 +505,7 @@ static nvm_status_t request_nvm_access(uint32_t nvm_block_id)
             }
         }
     } while((access != CORTEX_M3_ACCESS_GRANTED) && (NVM_SUCCESS == status));
-    
+
     /*
      * Mark controller as locked if successful so that it will be unlocked by a
      * call to release_ctrl_access.
@@ -514,7 +514,7 @@ static nvm_status_t request_nvm_access(uint32_t nvm_block_id)
     {
         g_envm_ctrl_locks |= (uint8_t)((uint32_t)0x01 << nvm_block_id);
     }
-    
+
     return status;
 }
 
@@ -524,7 +524,7 @@ static nvm_status_t request_nvm_access(uint32_t nvm_block_id)
 static nvm_status_t get_ctrl_access(uint32_t nvm_offset, uint32_t length)
 {
     nvm_status_t access_req_status;
-    
+
     /*
      * Gain access to eNVM controller(s).
      */
@@ -549,7 +549,7 @@ static nvm_status_t get_ctrl_access(uint32_t nvm_offset, uint32_t length)
     {
         access_req_status = request_nvm_access(NVM_BLOCK_1);
     }
-    
+
     return access_req_status;
 }
 
@@ -562,14 +562,14 @@ static nvm_status_t get_ctrl_access(uint32_t nvm_offset, uint32_t length)
 static void release_ctrl_access(void)
 {
     uint8_t block_locked;
-    
+
     block_locked = g_envm_ctrl_locks & NVM_BLOCK_0_LOCK_MASK;
     if(block_locked)
     {
         g_nvm[NVM_BLOCK_0]->REQ_ACCESS = 0x00u;
         g_envm_ctrl_locks &= ~NVM_BLOCK_0_LOCK_MASK;
     }
-    
+
     block_locked = g_envm_ctrl_locks & NVM_BLOCK_1_LOCK_MASK;
     if(block_locked)
     {
@@ -581,12 +581,12 @@ static void release_ctrl_access(void)
 /**************************************************************************//**
  * Wait for NVM to become ready from busy state
  */
-static uint32_t wait_nvm_ready(uint32_t block) 
+static uint32_t wait_nvm_ready(uint32_t block)
 {
     volatile uint32_t ctrl_status;
     uint32_t ctrl_ready;
     uint32_t inc;
-    
+
     /*
      * Wait for NVM to become ready.
      * We must ensure that we can read the ready bit set to 1 twice before we
@@ -599,7 +599,7 @@ static uint32_t wait_nvm_ready(uint32_t block)
             ctrl_ready = ctrl_status  & MSS_NVM_BUSY_B;
         } while(0u == ctrl_ready);
     }
-    
+
     return ctrl_status;
 }
 
@@ -610,7 +610,7 @@ static uint32_t wait_nvm_ready(uint32_t block)
   In case of error, return the content of the eNVM controller status register
   into the 32-bit word pointed to by p_status.
  */
-static uint32_t 
+static uint32_t
 write_nvm
 (
     uint32_t addr,
@@ -622,23 +622,23 @@ write_nvm
 {
     uint32_t length_written;
     uint32_t offset;
-   
+
     *p_status = 0u;
-    
-    /* Ignore upper address bits to ignore remapping setting. */    
+
+    /* Ignore upper address bits to ignore remapping setting. */
     offset = addr & NVM_OFFSET_SIGNIFICANT_BITS;
-    
+
     ASSERT(offset <= NVM1_TOP_OFFSET);
-    
+
     /* Adjust length to fit within one page. */
     length_written = get_remaining_page_length(offset, length);
-    
+
     if(offset <= NVM1_TOP_OFFSET)
     {
         uint32_t block;
         volatile uint32_t ctrl_status;
         uint32_t errors;
-        
+
         if(offset < NVM1_BOTTOM_OFFSET)
         {
             block = NVM_BLOCK_0;
@@ -648,7 +648,7 @@ write_nvm
             block = NVM_BLOCK_1;
             offset = offset - NVM1_BOTTOM_OFFSET;
         }
-        
+
         if(g_nvm[block]->STATUS & MSS_NVM_WR_DENIED)
         {
             /* Clear the access denied flag */
@@ -659,10 +659,10 @@ write_nvm
 
         /* Set requested locking option. */
         g_nvm[block]->PAGE_LOCK = lock_page;
-        
+
         /* Issue program command */
         g_nvm[block]->CMD = PROG_ADS | (offset & PAGE_ADDR_MASK);
-        
+
         /* Wait for NVM to become ready. */
         ctrl_status = wait_nvm_ready(block);
 
@@ -682,7 +682,7 @@ write_nvm
             *p_status = ctrl_status;
         }
     }
-    
+
     return length_written;
 }
 
@@ -701,14 +701,14 @@ static uint32_t get_remaining_page_length(uint32_t offset, uint32_t length)
 {
     uint32_t start_page_plus_one;
     uint32_t last_page;
-    
+
     start_page_plus_one = (offset / BYTES_PER_PAGE) + 1u;
     last_page = (offset + length) / BYTES_PER_PAGE;
     if(last_page >= start_page_plus_one)
     {
         length = BYTES_PER_PAGE - (offset % BYTES_PER_PAGE);
     }
-    
+
     return length;
 }
 
@@ -725,13 +725,13 @@ static void fill_wd_buffer
 {
     uint32_t inc;
     uint32_t wd_offset;
-    
+
     if(length != BYTES_PER_PAGE)
     {
         uint32_t * p_nvm32;
         uint32_t nb_non_written_words;
         uint32_t first_non_written_word;
-        /* 
+        /*
          * Fill beginning of WD[] with current content of NVM page that must not
          * be overwritten.
          */
@@ -745,20 +745,20 @@ static void fill_wd_buffer
         {
             g_nvm32[block]->WD[inc] = p_nvm32[inc];
         }
-        
+
         /*
          * Fill end of WD[] with current content of NVM page that must not be
          * overwritten.
          */
         first_non_written_word = ((offset + length) % BYTES_PER_PAGE) / NB_OF_BYTES_IN_A_WORD;
         nb_non_written_words = (BYTES_PER_PAGE / NB_OF_BYTES_IN_A_WORD) - first_non_written_word;
-        
+
         for(inc = 0u; inc < nb_non_written_words; ++inc)
         {
             g_nvm32[block]->WD[first_non_written_word + inc] = p_nvm32[first_non_written_word + inc];
         }
     }
-    
+
     /*
      * Fill WD[] with data requested to be written into NVM.
      */
@@ -797,14 +797,14 @@ NVM_read_page_write_count
     {
         write_count = 0u;
         offset = addr & NVM_OFFSET_SIGNIFICANT_BITS;
-        
+
         status = check_protection_reserved_nvm(offset, 0u);
-        
+
         if(NVM_SUCCESS == status)
-        {  
+        {
             /* Gain exclusive access to eNVM controller */
             status = get_ctrl_access(offset, 1u);
-        
+
             /* Read page write counter. */
             if(NVM_SUCCESS == status)
             {
@@ -819,7 +819,7 @@ NVM_read_page_write_count
                 }
                 /* Set R/W page status select bit for write count in auxiliary page read */
                 g_nvm[block]->NV_PAGE_STATUS |= 0x2u;
-        
+
                 if(block == NVM_BLOCK_0)
                 {
                     write_count = *((uint32_t *)((NVM0_BASE_ADDRESS + offset) & PAGE_ADDR_MASK));
@@ -828,27 +828,27 @@ NVM_read_page_write_count
                 {
                     write_count = *((uint32_t *)((NVM1_BASE_ADDRESS + offset) & PAGE_ADDR_MASK));
                 }
-        
+
                 /* Wait for NVM to become ready. */
                 status = wait_nvm_ready(block);
                 /* Clear R/W page status select bit */
                 g_nvm[block]->NV_PAGE_STATUS &= ~(0x2u);
             }
-        
+
             /* Release eNVM controllers so that other masters can gain access to it. */
             release_ctrl_access();
-        
+
             /* The write count is contained in bits [24:4] of the page's auxiliary data. */
             write_count = (write_count & AUX_DATA_WC_MASK) >> AUX_DATA_WC_SHIFT;
         }
     }
-    
+
     return write_count;
 }
 /**************************************************************************//**
  *
  */
- 
+
 /* eNVM0 -010/025/050 */
 #define LOWER0_PROTECT_BOTTOM_OFFSET        0x00000000
 #define LOWER0_PROTECT_TOP_OFFSET           0x00000FFFu
@@ -895,31 +895,31 @@ NVM_read_page_write_count
  *
  * 005 device
  *  The 005 device has 128KB of eNVM memory(0x00000 - 0x1FFFF)
- *  0x1F800 - 0x1FFFF - 2KB(16 pages) reserved eNVM memory   
+ *  0x1F800 - 0x1FFFF - 2KB(16 pages) reserved eNVM memory
  *  0x00000 - 0x00FFF - 4KB(32 pages) user lower(bottom) protected area of eNVM0 memory.
  *  0x1F000 - 0x1FFFF - 4KB(32 pages) user upper(top) protected area of eNVM0 memory
  *
  * 010/025/050 device
  *  The 010/025/050 device has 256KB of eNVM memory(0x00000 - 0x3FFFF)
- *  0x3F800 - 0x3FFFF - 2KB(16 pages) reserved eNVM memory   
+ *  0x3F800 - 0x3FFFF - 2KB(16 pages) reserved eNVM memory
  *  0x00000 - 0x00FFF - 4KB(32 pages) user lower(bottom) protected area of eNVM0 memory.
  *  0x3F000 - 0x3FFFF - 4KB(32 pages) user upper(top) protected area of eNVM0 memory
  *
  * 060 device
  *  The 060 device has 256KB of eNVM memory(0x00000 - 0x3FFFF)
- *  0x3E000 - 0x3FFFF - 8KB(64 pages) reserved eNVM memory   
+ *  0x3E000 - 0x3FFFF - 8KB(64 pages) reserved eNVM memory
  *  0x00000 - 0x00FFF - 4KB(32 pages) user lower0(bottom) protected area of eNVM0 memory.
- *  0x3F000 - 0x3FFFF - 4KB(32 pages) user upper0(top) protected area of eNVM0 memory    
+ *  0x3F000 - 0x3FFFF - 4KB(32 pages) user upper0(top) protected area of eNVM0 memory
  *  0x3E000 - 0x3EFFF - 4KB(32 pages) user lower1(bottom) protected area of eNVM0 memory.
  *  0x3D000 - 0x3DFFF - 4KB(32 pages) user upper1(top) protected area of eNVM0 memory.
  *
  * 090/150 device
  *  The 090/150 device has 512KB of eNVM memory(0x00000 - 0x7FFFF)
- *  0x7E000 - 0x7FFFF - 8KB(64 pages) reserved eNVM memory   
+ *  0x7E000 - 0x7FFFF - 8KB(64 pages) reserved eNVM memory
  *  0x00000 - 0x00FFF - 4KB(32 pages) user lower0(bottom) protected area of eNVM0 memory.
- *  0x7D000 - 0x7DFFF - 4KB(32 pages) user upper0(top) protected area of eNVM1 memory    
+ *  0x7D000 - 0x7DFFF - 4KB(32 pages) user upper0(top) protected area of eNVM1 memory
  *  0x7C000 - 0x7CFFF - 4KB(32 pages) user lower1(bottom) protected area of eNVM1 memory.
- *  0x7B000 - 0x7BFFF - 4KB(32 pages) user upper1(top) protected area of eNVM1 memory.          
+ *  0x7B000 - 0x7BFFF - 4KB(32 pages) user upper1(top) protected area of eNVM1 memory.
  *
  */
 static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t length)
@@ -940,23 +940,23 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
     }
 
     device_version = (SYSREG->DEVICE_VERSION & 0xFFFFu);
-    
+
     protection_flag = PROTECTION_OFF;
-    
+
     /* 005 device */
     if(0xF805u == device_version)
     {
         /* Read eNVM user protect register for lower and upper area protection data */
         protection_data = (SYSREG->ENVM_PROTECT_USER & PROTECT_USER_MASK);
-        
+
         /* Check whether the eNVM0 lower or upper area is protected or not */
         if(PROTECT_USER_MASK != protection_data)
         {
             protection_user0 = (protection_data & 0x000Fu);
             protection_user1 = ((protection_data & 0x00F0u) >> 4u);
-            
-            /* 
-             * SAR 79545. 
+
+            /*
+             * SAR 79545.
              * Check write or No read/write protection is enabled then don't lock pages
              * of that eNVM block
              */
@@ -965,8 +965,8 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
             {
                 g_do_not_lock_page = ON;
             }
-            
-            /* 
+
+            /*
              * SAR 70908.
              * Checking NVM0 lower protected area is Read or Write or 'No R/W' access
              */
@@ -980,17 +980,17 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                     protection_flag = protection_check(protection_user0, length);
                 }
             }
-            
+
             /*
              * SAR 70908.
-             * Checking NVM0 upper protected area is Read or Write or 'No R/W' access 
+             * Checking NVM0 upper protected area is Read or Write or 'No R/W' access
              */
             if((WRITE_ENABLED != protection_user1) && (OFF == protection_flag))
             {
-                /* Check the offset or (offset + length) is in the range of upper 
+                /* Check the offset or (offset + length) is in the range of upper
                  *  protect memory area, if it is then the memory is protected.
                  */
-                if(((offset >= OO5_UPPER0_PROTECT_BOTTOM_OFFSET) && 
+                if(((offset >= OO5_UPPER0_PROTECT_BOTTOM_OFFSET) &&
                     (offset <= OO5_UPPER0_PROTECT_TOP_OFFSET)) ||
                     (((offset + length_minus_one) >= OO5_UPPER0_PROTECT_BOTTOM_OFFSET) &&
                     (offset < OO5_UPPER0_PROTECT_BOTTOM_OFFSET)))
@@ -999,7 +999,7 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                 }
             }
         }
-        
+
         /* Check the eNVM memory is protected or not */
         if(PROTECTION_ON == protection_flag)
         {
@@ -1020,16 +1020,16 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                     (((offset + length_minus_one) >= OO5_NVM_RSV_OFFSET) &&
                     (offset < OO5_NVM_RSV_OFFSET)))
                 {
-                    /* 
+                    /*
                      * SAR 70908.
-                     * Status is protection error if the offset or (offset + length) is 
+                     * Status is protection error if the offset or (offset + length) is
                      * in reserved area of eNVM
                      */
                     status = NVM_PROTECTION_ERROR;
                 }
                 else
                 {
-                    /* Status is success if the offset or (offset + length) is 
+                    /* Status is success if the offset or (offset + length) is
                      * in RW access of eNVM memory(not protected)
                      */
                     status = NVM_SUCCESS;
@@ -1037,21 +1037,21 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
             }
         }
     }
-    
+
     /* 010/025/050 device */
     else if((0xF802u == device_version) || (0xF803u == device_version) || (0xF804u == device_version))
-    {    
+    {
         /* Read eNVM user protect register for lower and upper area protection data */
         protection_data = (SYSREG->ENVM_PROTECT_USER & PROTECT_USER_MASK);
-        
+
         /* Check whether the eNVM0 lower or upper area is protected or not */
         if(PROTECT_USER_MASK != protection_data)
         {
             protection_user0 = (protection_data & 0x000Fu);
             protection_user1 = ((protection_data & 0x00F0u) >> 4u);
-            
-            /* 
-             * SAR 79545. 
+
+            /*
+             * SAR 79545.
              * Check write or No read/write protection is enabled then don't lock pages
              * of that eNVM block
              */
@@ -1060,8 +1060,8 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
             {
                 g_do_not_lock_page = ON;
             }
-            
-            /* 
+
+            /*
              * SAR 70908.
              * Check NVM0 lower protected area is Read or Write or 'No R/W' access
              */
@@ -1075,14 +1075,14 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                     protection_flag = protection_check(protection_user0, length);
                 }
             }
-            
-            /* 
+
+            /*
              * SAR 70908.
              * Check NVM0 upper protected area is Read or Write or 'No R/W' access
              */
             if((WRITE_ENABLED != protection_user1) && (OFF == protection_flag))
             {
-                /* Check the offset or (offset + length) is in the range of upper 
+                /* Check the offset or (offset + length) is in the range of upper
                  * protect memory area, if it is then the memory is protected.
                  */
                 if(((offset >= UPPER0_PROTECT_BOTTOM_OFFSET) &&
@@ -1092,9 +1092,9 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                 {
                     protection_flag = protection_check(protection_user1, length);
                 }
-            } 
+            }
         }
-        
+
         /* Check eNVM lower or upper area of memory is protected or not */
         if(PROTECTION_ON == protection_flag)
         {
@@ -1114,16 +1114,16 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                 if(((offset >= NVM0_RSV_OFFSET) && (offset <= UPPER0_PROTECT_TOP_OFFSET)) ||
                     (((offset + length_minus_one) >= NVM0_RSV_OFFSET) && (offset < NVM0_RSV_OFFSET)))
                 {
-                    /* 
+                    /*
                      * SAR 70908.
-                     * Status is protection error if the offset or (offset + length) is 
+                     * Status is protection error if the offset or (offset + length) is
                      * in reserved area of eNVM
                      */
                     status = NVM_PROTECTION_ERROR;
                 }
                 else
                 {
-                    /* Status is success if offset or (offset + length) is 
+                    /* Status is success if offset or (offset + length) is
                      * in RW access of eNVM memory(not protected)
                      */
                     status = NVM_SUCCESS;
@@ -1131,13 +1131,13 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
             }
         }
     }
-    
+
     /* 060 device */
     else if(0xF808u == device_version)
     {
         /* Read eNVM user protect register for lower and upper area protection data */
         protection_data = (SYSREG->ENVM_PROTECT_USER & PROTECT_USER_MASK);
-        
+
         /* Check whether the eNVM0 lower0/1 or upper0/1 area is protected or not */
         if(PROTECT_USER_MASK != protection_data)
         {
@@ -1145,29 +1145,29 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
             protection_user1 = ((protection_data & 0x00F0u) >> 4u);
             protection_user2 = ((protection_data & 0x0F00u) >> 8u);
             protection_user3 = ((protection_data & 0xF000u) >> 12u);
-            
-            /* 
+
+            /*
              * SAR 70908.
              * Check NVM0 lower0 protected area is Read or Write or 'No R/W' access
              */
-            if(WRITE_ENABLED != protection_user0) 
+            if(WRITE_ENABLED != protection_user0)
             {
                 /* Check the offset is in the range of lower protected memory area,
                  * if it is then the memory is protected.
-                 */  
+                 */
                 if(offset <= LOWER0_PROTECT_TOP_OFFSET)
                 {
                     protection_flag = protection_check(protection_user0, length);
                 }
             }
-            
-            /* 
+
+            /*
              * SAR 70908.
              * Check NVM0 upper1 protected area is Read or Write or 'No R/W' access
              */
             if((WRITE_ENABLED != protection_user3) && (OFF == protection_flag))
             {
-                /* Check the offset or (offset + length) is in the range of upper1 
+                /* Check the offset or (offset + length) is in the range of upper1
                  *  protect memory area, if it is then the memory is protected.
                  */
                 if(((offset >= NVM0_UPPER1_PROTECT_BOTTOM_OFFSET) &&
@@ -1179,10 +1179,10 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                 }
             }
         }
-        
+
         /* Check eNVM lower0 or upper1 memory is protected or not.
-         * No protection check for  0x3F000 - 0x3FFFF and 0x3E000 - 0x3EFFF lower1/upper0 
-         * protected area of eNVM0 memory because it's fall under eNVM reserved area    
+         * No protection check for  0x3F000 - 0x3FFFF and 0x3E000 - 0x3EFFF lower1/upper0
+         * protected area of eNVM0 memory because it's fall under eNVM reserved area
          */
         if(PROTECTION_ON == protection_flag)
         {
@@ -1203,9 +1203,9 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                     (((offset + length_minus_one) >= O60_NVM_RSV_OFFSET) &&
                     (offset < O60_NVM_RSV_OFFSET)))
                 {
-                    /* 
+                    /*
                      * SAR 70908.
-                     * Status is protection error if the offset or (offset + length) is 
+                     * Status is protection error if the offset or (offset + length) is
                      * in reserved area of eNVM
                      */
                     status = NVM_PROTECTION_ERROR;
@@ -1215,15 +1215,15 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                     status = NVM_SUCCESS;
                 }
             }
-        }    
+        }
     }
-    
+
     /* 090/150 device */
     else if((0xF807u == device_version) || (0xF806u == device_version))
     {
         /* Read eNVM user protect register for lower and upper area protection data */
         protection_data = (SYSREG->ENVM_PROTECT_USER & PROTECT_USER_MASK);
-        
+
         /* Check whether the eNVM0 and eNVM1 lower or upper area is protected or not */
         if(PROTECT_USER_MASK != protection_data)
         {
@@ -1231,9 +1231,9 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
             protection_user1 = ((protection_data & 0x00F0u) >> 4u);
             protection_user2 = ((protection_data & 0x0F00u) >> 8u);
             protection_user3 = ((protection_data & 0xF000u) >> 12u);
-            
-            /* 
-             * SAR 79545. 
+
+            /*
+             * SAR 79545.
              * Check write or No read/write protection is enabled then don't lock pages
              * of that eNVM block
              */
@@ -1245,11 +1245,11 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
               }
             }
 
-            /* 
+            /*
              * SAR 70908.
              * Check NVM0 lower0 protected area is Read or Write or 'No R/W' access
              */
-            if(WRITE_ENABLED != protection_user0) 
+            if(WRITE_ENABLED != protection_user0)
             {
                 /* Check the offset is in the range of lower0 protect memory area,
                  * if it is then the memory is protected.
@@ -1259,13 +1259,13 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                     protection_flag = protection_check(protection_user0, length);
                 }
             }
-            /* 
+            /*
              * SAR 70908.
              * Check NVM1 upper1 protected area is Read or Write or 'No R/W' access
-             */            
+             */
             if((WRITE_ENABLED != protection_user3) && (OFF == protection_flag))
             {
-                /* Check the offset or (offset + length)is in the range of upper1 
+                /* Check the offset or (offset + length)is in the range of upper1
                  * protect memory area, if it is then the memory is protected.
                  */
                 if(((offset >= UPPER1_PROTECT_BOTTOM_OFFSET) &&
@@ -1276,13 +1276,13 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                     protection_flag = protection_check(protection_user3, length);
                 }
             }
-            /* 
+            /*
              * SAR 70908.
              * Check NVM1 lower1 protected area is Read or Write or 'No R/W' access
              */
             if((WRITE_ENABLED != protection_user2) && (OFF == protection_flag))
             {
-                /* Check the offset or (offset + length)is in the range of lower1 
+                /* Check the offset or (offset + length)is in the range of lower1
                  * protect memory area, if it is then the memory is protected.
                  */
                 if(((offset >= LOWER1_PROTECT_BOTTOM_OFFSET) &&
@@ -1293,7 +1293,7 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                     protection_flag = protection_check(protection_user2, length);
                 }
             }
-            /* 
+            /*
              * SAR 70908.
              * Check eNVM0 upper0 protected area(in eNVM1) is Read or Write or 'No R/W' access
              */
@@ -1315,8 +1315,8 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
         /* Check eNVM lower0/1 and upper0/1 memory is protected or not */
         if(PROTECTION_ON == protection_flag)
         {
-           /* Status is protection error if lower or upper area of eNVM0 or 
-            * eNVM1 is protected 
+           /* Status is protection error if lower or upper area of eNVM0 or
+            * eNVM1 is protected
             */
             status = NVM_PROTECTION_ERROR;
         }
@@ -1334,16 +1334,16 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
                     (((offset + length_minus_one) >= NVM1_RSV_OFFSET) &&
                     (offset < NVM1_RSV_OFFSET)))
                 {
-                    /* 
+                    /*
                      * SAR 70908.
-                     * Status is protection error if the offset or (offset + length) is 
+                     * Status is protection error if the offset or (offset + length) is
                      * in reserved area of eNVM
                      */
                     status = NVM_PROTECTION_ERROR;
                 }
                 else
                 {
-                    /* Status is success if offset or (offset + length) is 
+                    /* Status is success if offset or (offset + length) is
                      * in RW access of eNVM memory
                      */
                     status = NVM_SUCCESS;
@@ -1355,10 +1355,10 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
 }
 /**************************************************************************//**
  * protection_check()
- * if the eNVM0 or eNVM1 lower/upper protected area with Read-Only access, 
+ * if the eNVM0 or eNVM1 lower/upper protected area with Read-Only access,
  * then NVM_read_page_write_count() function can read the write count value
- * from eNVM page, length is set to zero in the function and return with 
- * protection off 
+ * from eNVM page, length is set to zero in the function and return with
+ * protection off
  * The NVM_write() and NVM_unlock() function parameter length is always
  * greater than zero for read only access and returns protection on.
  *
@@ -1366,9 +1366,9 @@ static nvm_status_t check_protection_reserved_nvm(uint32_t offset, uint32_t leng
  * access then return with protection on
  */
 static uint32_t protection_check(uint32_t protect_user, uint32_t length)
-{    
+{
     uint32_t protect_flag;
-    
+
     /* Check Read Only access for page write count */
     if((READ_ONLY == protect_user) && (0x0u == length))
     {

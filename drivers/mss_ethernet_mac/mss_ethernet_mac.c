@@ -7,9 +7,9 @@
  * SVN $Revision: 7657 $
  * SVN $Date: 2015-08-13 17:49:00 +0530 (Thu, 13 Aug 2015) $
  */
-#include "../../CMSIS/m2sxxx.h"
-#include "../../CMSIS/mss_assert.h"
-#include "../../CMSIS/hw_reg_io.h"
+#include "CMSIS/m2sxxx.h"
+#include "CMSIS/mss_assert.h"
+#include "CMSIS/hw_reg_io.h"
 #include "mss_ethernet_mac_regs.h"
 #include "mss_ethernet_mac.h"
 #include "phy.h"
@@ -138,7 +138,7 @@ static void coresgmii_set_link_speed(uint32_t speed);
 
 #if (MSS_MAC_PHY_INTERFACE == BASEX1000)
 static uint8_t coresgmii_get_link_status
-(    
+(
     mss_mac_speed_t * speed,
     uint8_t *     fullduplex
 );
@@ -156,10 +156,10 @@ void EthernetMAC_IRQHandler(void);
 /**************************************************************************//**
  * See mss_ethernet_mac.h for details of how to use this function.
  */
-void 
+void
 MSS_MAC_init
-( 
-    mss_mac_cfg_t * cfg 
+(
+    mss_mac_cfg_t * cfg
 )
 {
     ASSERT(cfg != NULL_POINTER);
@@ -173,14 +173,14 @@ MSS_MAC_init
         NVIC_ClearPendingIRQ(EthernetMAC_IRQn);
         /* Take MAC out of reset. */
         SYSREG->SOFT_RST_CR &= ~SYSREG_MAC_SOFTRESET_MASK;
-        
+
         mac_reset();
-        
+
         config_mac_hw(cfg);
-        
+
         /* Assign MAC station address */
         assign_station_addr(cfg->mac_addr);
-        
+
         /* Intialize Tx & Rx descriptor rings */
         tx_desc_ring_init();
         rx_desc_ring_init();
@@ -190,16 +190,16 @@ MSS_MAC_init
         g_mac.last_tx_index = INVALID_INDEX;
         g_mac.next_tx_index = 0;
         g_mac.nb_available_tx_desc = MSS_MAC_TX_RING_SIZE;
-        
+
         /* Initialize Rx descriptors related variables. */
         g_mac.nb_available_rx_desc = MSS_MAC_RX_RING_SIZE;
         g_mac.next_free_rx_desc_index = 0;
         g_mac.first_rx_desc_index = INVALID_INDEX;
-        
+
         /* initialize default interrupt handlers */
         g_mac.tx_complete_handler = NULL_POINTER;
         g_mac.pckt_rx_callback = NULL_POINTER;
-        
+
         /* Initialize PHY interface */
         if(MSS_MAC_AUTO_DETECT_PHY_ADDRESS == cfg->phy_addr)
         {
@@ -228,26 +228,26 @@ MSS_MAC_init
 #endif
 
 #if (MSS_MAC_PHY_INTERFACE == BASEX1000)
-        coresgmii_set_link_speed(MSS_MAC_1000MBPS); 
-#endif          
+        coresgmii_set_link_speed(MSS_MAC_1000MBPS);
+#endif
 
 #if ((MSS_MAC_PHY_INTERFACE == SGMII) || (MSS_MAC_PHY_INTERFACE == BASEX1000))
         coresgmii_autonegotiate();
 #endif
 
         update_mac_cfg();
-        
+
         /* Disabled MAC statistics counters are cleared after they are read.*/
         SYSREG->MAC_STAT_CLRONRD_CR = 0x0u;
         /*Need to write 1 and then 0 to correctly clear and start all counters*/
         SYSREG->MAC_STAT_CLR_CR = 0x01u;
         SYSREG->MAC_STAT_CLR_CR = 0x00u;
-        
+
         /* Enable transmission at MAC level. */
         set_bit_reg32(&MAC->CFG1, CFG1_TX_EN);
         /* Enable reception at MAC level.    */
         set_bit_reg32(&MAC->CFG1, CFG1_RX_EN);
-        
+
         /* Enable Tx Packet interrupt */
         set_bit_reg32(&MAC->DMA_IRQ_MASK, MSS_MAC_TXPKTSENT_IRQ);
         /* Enable RX Packet interrupt */
@@ -256,14 +256,14 @@ MSS_MAC_init
 }
 
 /**************************************************************************//**
- * 
+ *
  */
 static void update_mac_cfg(void)
 {
     mss_mac_speed_t speed;
     uint8_t fullduplex;
     uint8_t link_up;
-    
+
 #if (MSS_MAC_PHY_INTERFACE == BASEX1000)
     link_up = coresgmii_get_link_status(&speed, &fullduplex);
 #else
@@ -274,11 +274,11 @@ static void update_mac_cfg(void)
     {
 
 #if (MSS_MAC_PHY_INTERFACE == RGMII)
-        corergmii_set_link_speed(speed); 
+        corergmii_set_link_speed(speed);
 #endif
 
 #if (MSS_MAC_PHY_INTERFACE == SGMII)
-        coresgmii_set_link_speed(speed); 
+        coresgmii_set_link_speed(speed);
 #endif
 
         /* Reconfigure MAC based on PHY configuration. */
@@ -290,7 +290,7 @@ static void update_mac_cfg(void)
         {
             MAC->INTERFACE_CTRL &= ~INTERFACE_SPEED_MASK;
         }
-        
+
         /* Set byte/nibble mode based on interface type and link speed. */
         if(MSS_MAC_1000MBPS == speed)
         {
@@ -304,7 +304,7 @@ static void update_mac_cfg(void)
             MAC->CFG2 &= ~(CFG2_BYTE_MASK | CFG2_NIBBLE_MASK);
             MAC->CFG2 |= CFG2_NIBBLE_MASK;
         }
-        
+
         /* Avoid extra divide by 10 of clock for 10Mbps links. */
         if(MSS_MAC_10MBPS == speed)
         {
@@ -312,7 +312,7 @@ static void update_mac_cfg(void)
         }
 
         SYSREG->MAC_CR = (SYSREG->MAC_CR & ~MAC_CONFIG_SPEED_MASK) | (uint32_t)speed;
-        
+
         /* Configure duplex mode */
         if(MSS_MAC_HALF_DUPLEX == fullduplex)
         {
@@ -326,7 +326,7 @@ static void update_mac_cfg(void)
             MAC->CFG2 |= CFG2_FDX_MASK;
             MAC->FIFO_CFG5 &= ~FIFO_CFG5_CFGHDPLX_MASK;
         }
-        
+
     }
 }
 
@@ -344,26 +344,26 @@ uint8_t MSS_MAC_get_link_status
     mss_mac_speed_t link_speed;
     uint8_t link_fullduplex;
     uint8_t link_up;
-    
+
 #if (MSS_MAC_PHY_INTERFACE == BASEX1000)
     link_up = coresgmii_get_link_status(&link_speed, &link_fullduplex);
-#else    
+#else
     link_up = MSS_MAC_phy_get_link_status(&link_speed, &link_fullduplex);
 #endif
 
     if(link_up != MSS_MAC_LINK_DOWN)
     {
         uint8_t interface;
-        
+
         interface = (uint8_t)((SYSREG->MAC_CR >> MAC_CONFIG_INTF) & 0x00000007u);
-        
+
         /*----------------------------------------------------------------------
          * Update MAC configuration if link characteristics changed.
          */
         if(link_speed != previous_speed)
         {
             mss_mac_speed_t mac_link_speed;
-            
+
             /* Reconfigure MAC based on PHY configuration. */
             if(MSS_MAC_100MBPS == link_speed)
             {
@@ -373,7 +373,7 @@ uint8_t MSS_MAC_get_link_status
             {
                 MAC->INTERFACE_CTRL &= ~INTERFACE_SPEED_MASK;
             }
-            
+
             /* Set byte/nibble mode based on interface type and link speed. */
             if(MSS_MAC_1000MBPS == link_speed)
             {
@@ -387,7 +387,7 @@ uint8_t MSS_MAC_get_link_status
                 MAC->CFG2 |= CFG2_NIBBLE_MASK;
             }
             /* TBI interface */
-            if(0x02u == interface) 
+            if(0x02u == interface)
             {
                 mac_link_speed = link_speed;
             }
@@ -404,17 +404,17 @@ uint8_t MSS_MAC_get_link_status
                 }
             }
 #if (MSS_MAC_PHY_INTERFACE == RGMII)
-            corergmii_set_link_speed(link_speed); 
+            corergmii_set_link_speed(link_speed);
 #endif
 
 #if (MSS_MAC_PHY_INTERFACE == SGMII)
-            coresgmii_set_link_speed(link_speed); 
+            coresgmii_set_link_speed(link_speed);
 #endif
             SYSREG->MAC_CR = (SYSREG->MAC_CR & ~MAC_CONFIG_SPEED_MASK) | (uint32_t)mac_link_speed;
         }
-        
+
         previous_speed = link_speed;
-        
+
         if(link_fullduplex != previous_duplex)
         {
             /* Configure duplex mode */
@@ -432,7 +432,7 @@ uint8_t MSS_MAC_get_link_status
             }
         }
         previous_duplex = link_fullduplex;
-        
+
         /*----------------------------------------------------------------------
          * Return current link speed and duplex mode.
          */
@@ -440,7 +440,7 @@ uint8_t MSS_MAC_get_link_status
         {
             *speed = link_speed;
         }
-        
+
         if(fullduplex != NULL_POINTER)
         {
             *fullduplex = link_fullduplex;
@@ -458,7 +458,7 @@ uint8_t MSS_MAC_get_link_status
 
 #if ((MSS_MAC_PHY_INTERFACE == SGMII) || (MSS_MAC_PHY_INTERFACE == BASEX1000))
 /*----------------------------------------------------------------------
- * Make sure SGMII/1000baseX interface link is up. if interface is 
+ * Make sure SGMII/1000baseX interface link is up. if interface is
  * SGMII/1000baseX
  */
 #define MDIO_PHY_ADDR   MSS_MAC_INTERFACE_MDIO_ADDR
@@ -467,11 +467,11 @@ uint8_t MSS_MAC_get_link_status
         {
             uint16_t phy_reg;
             uint16_t sgmii_link_up;
-            
+
             /* Find out if link is up on SGMII link between MAC and external PHY. */
             phy_reg = MSS_MAC_read_phy_reg(MDIO_PHY_ADDR, MII_BMSR);
             sgmii_link_up = phy_reg & BMSR_LSTATUS;
-            
+
             if(0u == sgmii_link_up)
             {
                 /* Initiate auto-negotiation on the SGMII link. */
@@ -482,15 +482,15 @@ uint8_t MSS_MAC_get_link_status
                 MSS_MAC_write_phy_reg(MDIO_PHY_ADDR, MII_BMCR, phy_reg);
             }
          }
-#endif 
-    }   
+#endif
+    }
     return link_up;
 }
 
 /**************************************************************************//**
  * See mss_ethernet_mac.h for details of how to use this function.
  */
-void 
+void
 MSS_MAC_cfg_struct_def_init
 (
     mss_mac_cfg_t * cfg
@@ -530,7 +530,7 @@ MSS_MAC_cfg_struct_def_init
         cfg->non_btb_IFG        = MSS_MAC_NONBTBIFG_DEFVAL;
         cfg->slottime           = MSS_MAC_SLOTTIME_DEFVAL;
         cfg->framedrop_mask     = MSS_MAC_FRAME_DROP_MASK_DEFVAL;
-        
+
         cfg->mac_addr[0] = g_default_mac_address[0];
         cfg->mac_addr[1] = g_default_mac_address[1];
         cfg->mac_addr[2] = g_default_mac_address[2];
@@ -541,9 +541,9 @@ MSS_MAC_cfg_struct_def_init
 }
 
 /**************************************************************************//**
- * 
+ *
  */
-static void 
+static void
 mac_reset
 (
     void
@@ -581,15 +581,15 @@ mac_reset
 }
 
 /**************************************************************************//**
- * 
+ *
  */
 static void config_mac_hw(const mss_mac_cfg_t * cfg)
 {
     uint32_t tempreg;
-    
+
     /* Check for validity of configuration parameters */
     ASSERT( IS_STATE(cfg->tx_edc_enable) );
-    ASSERT( IS_STATE(cfg->rx_edc_enable) );        
+    ASSERT( IS_STATE(cfg->rx_edc_enable) );
     ASSERT( MSS_MAC_PREAMLEN_MAXVAL >= cfg->preamble_length );
     ASSERT( IS_STATE(cfg->hugeframe_enable) );
     ASSERT( IS_STATE(cfg->length_field_check) );
@@ -598,19 +598,19 @@ static void config_mac_hw(const mss_mac_cfg_t * cfg)
     ASSERT( IS_STATE(cfg->loopback) );
     ASSERT( IS_STATE(cfg->rx_flow_ctrl) );
     ASSERT( IS_STATE(cfg->tx_flow_ctrl) );
-    ASSERT( MSS_MAC_MINIFG_MAXVAL >= cfg->min_IFG );            
-    ASSERT( MSS_MAC_BTBIFG_MAXVAL >= cfg->btb_IFG );           
-    ASSERT( MSS_MAC_MAXRETX_MAXVAL >= cfg->max_retx_tries );      
-    ASSERT( IS_STATE(cfg->excessive_defer) );    
-    ASSERT( IS_STATE(cfg->nobackoff) );         
+    ASSERT( MSS_MAC_MINIFG_MAXVAL >= cfg->min_IFG );
+    ASSERT( MSS_MAC_BTBIFG_MAXVAL >= cfg->btb_IFG );
+    ASSERT( MSS_MAC_MAXRETX_MAXVAL >= cfg->max_retx_tries );
+    ASSERT( IS_STATE(cfg->excessive_defer) );
+    ASSERT( IS_STATE(cfg->nobackoff) );
     ASSERT( IS_STATE(cfg->backpres_nobackoff) );
-    ASSERT( IS_STATE(cfg->ABEB_enable) );        
-    ASSERT( MSS_MAC_ABEBTRUNC_MAXVAL >= cfg->ABEB_truncvalue );    
-    ASSERT( MSS_MAC_BY28_PHY_CLK >= cfg->phyclk );            
-    ASSERT( IS_STATE(cfg->supress_preamble) );   
-    ASSERT( MSS_MAC_MAXFRAMELEN_MAXVAL >= cfg->max_frame_length );   
+    ASSERT( IS_STATE(cfg->ABEB_enable) );
+    ASSERT( MSS_MAC_ABEBTRUNC_MAXVAL >= cfg->ABEB_truncvalue );
+    ASSERT( MSS_MAC_BY28_PHY_CLK >= cfg->phyclk );
+    ASSERT( IS_STATE(cfg->supress_preamble) );
+    ASSERT( MSS_MAC_MAXFRAMELEN_MAXVAL >= cfg->max_frame_length );
     ASSERT( MSS_MAC_SLOTTIME_MAXVAL >= cfg->slottime );
-    
+
     /*--------------------------------------------------------------------------
      * Configure MAC FIFOs error detection and correction (EDAC)
      */
@@ -632,7 +632,7 @@ static void config_mac_hw(const mss_mac_cfg_t * cfg)
     {
         clear_bit_reg32(&SYSREG->EDAC_CR,MAC_EDAC_RX_EN);
     }
-    
+
     /*--------------------------------------------------------------------------
      * Configure PHY related MII MGMT registers
      */
@@ -645,16 +645,16 @@ static void config_mac_hw(const mss_mac_cfg_t * cfg)
 
     /*--------------------------------------------------------------------------
      * Clear all reset bits
-     */              
+     */
     /* Clear soft reset for MCXMAC, Tx function, Rx function, Tx MAC control and
      * Rx MAC control. */
     MAC->CFG1 &= ~(CFG1_SOFT_RST_MASK | CFG1_TXCTL_RST_MASK |
                    CFG1_RXCTL_RST_MASK | CFG1_CFG1_TX_RST_MASK |
                    CFG1_CFG1_RX_RST_MASK);
-    
+
     /* Clear MCXMAC interface reset. */
     clear_bit_reg32(&MAC->INTERFACE_CTRL, MII_INTF_RESET);
-    
+
     /* Clear FIFO resets. */
     MAC->FIFO_CFG0 &= ~(FIFO_CFG0_WMM_RST_MASK | FIFO_CFG0_RSYS_RST_MASK |
                         FIFO_CFG0_RFAB_RST_MASK | FIFO_CFG0_TSYS_RST_MASK |
@@ -671,12 +671,12 @@ static void config_mac_hw(const mss_mac_cfg_t * cfg)
     {
         tempreg = 0u;
     }
-    
+
     if(MSS_MAC_ENABLE == cfg->rx_flow_ctrl)
     {
         tempreg |= CFG1_RX_FCTL_MASK;
     }
-    
+
     if(MSS_MAC_ENABLE == cfg->tx_flow_ctrl)
     {
         tempreg |= CFG1_TX_FCTL_MASK;
@@ -687,22 +687,22 @@ static void config_mac_hw(const mss_mac_cfg_t * cfg)
      *
      */
     tempreg = CFG2_FDX_MASK;
-    
+
     if(MSS_MAC_ENABLE == cfg->append_CRC)
     {
         tempreg |= CFG2_CRC_EN_MASK;
     }
-                                   
+
     if(MSS_MAC_ENABLE == cfg->pad_n_CRC)
     {
         tempreg |= CFG2_PAD_CRC_EN_MASK;
     }
-                                  
+
     if(MSS_MAC_ENABLE == cfg->length_field_check)
     {
         tempreg |= CFG2_LEN_CHECK_MASK;
     }
-                                           
+
     if(MSS_MAC_ENABLE == cfg->hugeframe_enable)
     {
         tempreg |= CFG2_HUGE_FRAME_EN_MASK;
@@ -715,10 +715,10 @@ static void config_mac_hw(const mss_mac_cfg_t * cfg)
     /* TBI and GMII use byte interface. */
     tempreg |= CFG2_BYTE_MASK;
 #endif
-  
+
     tempreg |= (((uint32_t)cfg->preamble_length ) << CFG2_PREAM_LEN);
     MAC->CFG2 = tempreg;
-    
+
     /*--------------------------------------------------------------------------
      *
      */
@@ -726,34 +726,34 @@ static void config_mac_hw(const mss_mac_cfg_t * cfg)
     tempreg |= ((uint32_t)cfg->min_IFG << IFG_MINIFGENF);
     tempreg |= ((uint32_t)cfg->non_btb_IFG << IFG_NONBTBIPG);
     MAC->IFG = tempreg;
-    
+
     /*--------------------------------------------------------------------------
      *
      */
     tempreg = (uint32_t)cfg->slottime & HALF_DUPLEX_SLOTTIME_MASK;
-    
+
     tempreg |= (uint32_t)cfg->max_retx_tries << HALF_DUPLEX_RETX_MAX_OFFSET;
-    
+
     if(MSS_MAC_ENABLE == cfg->excessive_defer)
     {
         tempreg |= HALF_DUPLEX_EXCS_DEFER_MASK;
     }
-                                       
+
     if(MSS_MAC_ENABLE == cfg->nobackoff)
     {
         tempreg |= HALF_DUPLEX_NO_BACKOFF_MASK;
     }
-                                       
+
     if(MSS_MAC_ENABLE == cfg->backpres_nobackoff)
     {
         tempreg |= HALF_DUPLEX_BACKPRES_NOBACKOFF_MASK;
     }
-                                       
+
     if(MSS_MAC_ENABLE == cfg->ABEB_enable)
     {
         tempreg |= HALF_DUPLEX_ABEB_ENABLE_MASK;
     }
-                                       
+
     tempreg |= (uint32_t)cfg->ABEB_truncvalue << HALF_DUPLEX_ABEB_TUNC_OFFSET;
     MAC->HALF_DUPLEX = tempreg;
 
@@ -765,7 +765,7 @@ static void config_mac_hw(const mss_mac_cfg_t * cfg)
     MAC->FIFO_CFG0 = ( FIFO_CFG0_WMM_ENABLE  | FIFO_CFG0_RSYS_ENABLE |
                        FIFO_CFG0_RFAB_ENABLE | FIFO_CFG0_TSYS_ENABLE |
                        FIFO_CFG0_TFAB_ENABLE );
-    /* RX FIFO size : 8KB  */        
+    /* RX FIFO size : 8KB  */
     MAC->FIFO_CFG1 = FIFO_CFG1_DEFVAL;
     /* Rx FIFO watermark */
     MAC->FIFO_CFG2 = FIFO_CFG2_DEFVAL;
@@ -798,7 +798,7 @@ static void config_mac_hw(const mss_mac_cfg_t * cfg)
  * to converts from GMII to SGMII. Hence the MAC needs to be configured
  * for GMII operations to use an external SGMII PHY.
  */
-         
+
 #if ((MSS_MAC_PHY_INTERFACE == SGMII) || (MSS_MAC_PHY_INTERFACE == BASEX1000) || \
         (MSS_MAC_PHY_INTERFACE == GMII) || (MSS_MAC_PHY_INTERFACE == RGMII))
     tempreg = 0x04u;
@@ -811,7 +811,7 @@ static void config_mac_hw(const mss_mac_cfg_t * cfg)
 #if (MSS_MAC_PHY_INTERFACE == TBI)
     tempreg = 0x02u;
 #endif
-  
+
     SYSREG->MAC_CR = tempreg << MAC_CONFIG_INTF;
 }
 
@@ -826,20 +826,20 @@ MSS_MAC_write_phy_reg
     uint16_t regval
 )
 {
-    ASSERT(MSS_MAC_PHYADDR_MAXVAL >= phyaddr); 
+    ASSERT(MSS_MAC_PHYADDR_MAXVAL >= phyaddr);
     ASSERT(MSS_MAC_PHYREGADDR_MAXVAL >= regaddr);
-    /* 
+    /*
      * Write PHY address in MII Mgmt address register.
      * Makes previous register address 0 & invalid.
-     */ 
-    if((MSS_MAC_PHYADDR_MAXVAL >= phyaddr) && 
+     */
+    if((MSS_MAC_PHYADDR_MAXVAL >= phyaddr) &&
        (MSS_MAC_PHYREGADDR_MAXVAL >= regaddr))
     {
         /* Wait for MII Mgmt interface to complete previous operation. */
         do {
             ;
         } while(MAC->MII_INDICATORS & MII_BUSY_INDICATOR_MASK);
-    
+
         /* Load PHY address in MII Mgmt address register */
         MAC->MII_ADDRESS = (((uint32_t)phyaddr)<<MII_PHY_ADDR);
         /* Load register address in MII Mgmt address register */
@@ -862,23 +862,23 @@ MSS_MAC_read_phy_reg
     uint32_t timeout = 100000u;
     uint16_t read_val = 0u;
 
-    ASSERT(MSS_MAC_PHYADDR_MAXVAL >= phyaddr); 
+    ASSERT(MSS_MAC_PHYADDR_MAXVAL >= phyaddr);
     ASSERT(MSS_MAC_PHYREGADDR_MAXVAL >= regaddr);
-    /* 
+    /*
      * Write PHY address in MII Mgmt address register.
      * Makes previous register address 0 & invalid.
-     */ 
-    if((MSS_MAC_PHYADDR_MAXVAL >= phyaddr) && 
+     */
+    if((MSS_MAC_PHYADDR_MAXVAL >= phyaddr) &&
        (MSS_MAC_PHYREGADDR_MAXVAL >= regaddr))
     {
         uint32_t mii_not_valid;
         uint32_t mii_busy;
-        
+
         /* Wait for MII Mgmt interface to complete previous operation. */
         do {
             ;
         } while((MAC->MII_INDICATORS & MII_BUSY_INDICATOR_MASK) != 0u);
-        
+
         MAC->MII_ADDRESS = (((uint32_t)phyaddr) << MII_PHY_ADDR);
         /* Load PHY register address in MII Mgmt address register */
         MAC->MII_ADDRESS |= (uint32_t)regaddr;
@@ -906,7 +906,7 @@ MSS_MAC_read_phy_reg
 /**************************************************************************//**
  * See mss_ethernet_mac.h for details of how to use this function.
  */
-uint32_t 
+uint32_t
 MSS_MAC_read_stat
 (
     mss_mac_stat_t stat
@@ -916,7 +916,7 @@ MSS_MAC_read_stat
 
     volatile uint32_t * const stat_regs_lut[] =
     {
-        &MAC->TR64,     /* FRAME_CNT_64 */        
+        &MAC->TR64,     /* FRAME_CNT_64 */
         &MAC->TR127,    /* FRAME_CNT_127 */
         &MAC->TR255,    /* FRAME_CNT_255 */
         &MAC->TR511,    /* FRAME_CNT_511 */
@@ -961,9 +961,9 @@ MSS_MAC_read_stat
         &MAC->TUND,     /* TX_UNDERSIZE_PKT_CNT */
         &MAC->TFRG      /* TX_FRAGMENT_CNT */
     };
-    
+
     ASSERT(MSS_MAC_LAST_STAT > stat);
-    
+
     if(MSS_MAC_LAST_STAT > stat)
     {
         stat_val = *stat_regs_lut[stat];
@@ -999,26 +999,26 @@ MSS_MAC_receive_pkt
 
     /* Make this function atomic w.r.to EMAC interrupt */
     NVIC_DisableIRQ(EthernetMAC_IRQn);
-    
+
     ASSERT(NULL_POINTER != rx_pkt_buffer);
     ASSERT(IS_WORD_ALIGNED(rx_pkt_buffer));
-    
+
     if(g_mac.nb_available_rx_desc > 0)
     {
         int16_t next_rx_desc_index;
-        
+
         --g_mac.nb_available_rx_desc;
         next_rx_desc_index = g_mac.next_free_rx_desc_index;
-        
+
         g_mac.rx_desc_tab[next_rx_desc_index].pkt_start_addr = rx_pkt_buffer;
         g_mac.rx_desc_tab[next_rx_desc_index].caller_info = p_user_data;
 
         /* Set own flag of this descriptor to indicate ready for RX */
         g_mac.rx_desc_tab[next_rx_desc_index].pkt_size |= DMA_DESC_EMPTY_FLAG_MASK;
 
-        /* 
+        /*
            If the RX is found disabled, then it might be because this is the
-           first time a packet is scheduled for reception or the RX ENABLE is 
+           first time a packet is scheduled for reception or the RX ENABLE is
            made zero by RX overflow or RX bus error. In either case, this
            function tries to schedule the current packet for reception.
         */
@@ -1038,8 +1038,8 @@ MSS_MAC_receive_pkt
         {
             g_mac.next_free_rx_desc_index = 0;
         }
-        
-        /* Packet scheduled for reception successfully only when there 
+
+        /* Packet scheduled for reception successfully only when there
            is no new RX bus error */
         if(0u == read_bit_reg32(&MAC->DMA_RX_STATUS, DMA_RXBUSERR))
         {
@@ -1054,7 +1054,7 @@ MSS_MAC_receive_pkt
 /***************************************************************************//**
  * See mss_ethernet_mac.h for details of how to use this function.
  */
-uint8_t 
+uint8_t
 MSS_MAC_send_pkt
 (
     uint8_t const * tx_buffer,
@@ -1070,24 +1070,24 @@ MSS_MAC_send_pkt
     ASSERT(NULL_POINTER != tx_buffer);
     ASSERT(0 != tx_length);
     ASSERT(IS_WORD_ALIGNED(tx_buffer));
-    
+
     if(g_mac.nb_available_tx_desc > 0)
     {
         mss_mac_tx_desc_t * p_next_tx_desc;
-        
+
         --g_mac.nb_available_tx_desc;
         if(INVALID_INDEX == g_mac.first_tx_index)
         {
             g_mac.first_tx_index = g_mac.next_tx_index;
         }
         g_mac.last_tx_index = g_mac.next_tx_index;
-        
+
         p_next_tx_desc = &g_mac.tx_desc_tab[g_mac.next_tx_index];
         p_next_tx_desc->pkt_start_addr = tx_buffer;
         p_next_tx_desc->caller_info = p_user_data;
         /* Set the packet length, packet overrides and clear descriptor empty: */
         p_next_tx_desc->pkt_size = tx_length;
-        
+
         /*
             If TX is found disabled, this might be because this is the first
             time packet is being sent or the DMA completed previous transfer and
@@ -1101,7 +1101,7 @@ MSS_MAC_send_pkt
         /* Enable DMA transmit anyway to cover the case where Tx completed after
            the read of DMA_TX_CTRL. */
         MAC->DMA_TX_CTRL = DMA_TX_ENABLED;
-        
+
         /* Point the next_tx_desc to next free descriptor in the ring */
         /* Wrap around in case next descriptor is pointing to last in the ring */
         if((MSS_MAC_TX_RING_SIZE - 1) == g_mac.next_tx_index)
@@ -1112,15 +1112,15 @@ MSS_MAC_send_pkt
         {
             ++g_mac.next_tx_index;
         }
-        
-        /* Packet scheduled for transmission successfully only when 
+
+        /* Packet scheduled for transmission successfully only when
            there is no TX bus error */
         if(0u == read_bit_reg32(&MAC->DMA_TX_STATUS, DMA_TXBUSERR))
         {
             status = MSS_MAC_SUCCESS;
         }
     }
-    
+
     /* Ethernet Interrupt Enable function. */
     NVIC_EnableIRQ(EthernetMAC_IRQn);
     return status;
@@ -1138,7 +1138,7 @@ EthernetMAC_IRQHandler
     uint32_t dma_irq;
     uint32_t packet_sent;
     uint32_t packet_received;
-    
+
     dma_irq = MAC->DMA_IRQ;
 
     /* Transmit packet sent interrupt */
@@ -1179,7 +1179,7 @@ void MSS_MAC_set_rx_callback
 
 /**************************************************************************/
 /* Private Function definitions                                           */
-/**************************************************************************/  
+/**************************************************************************/
 
 /**************************************************************************//**
  * This is default "Receive packet interrupt handler. This function finds the
@@ -1187,7 +1187,7 @@ void MSS_MAC_set_rx_callback
  * This informs the received packet size to the application and
  * relinquishes the packet buffer from the associated DMA descriptor.
  */
-static void 
+static void
 rxpkt_handler
 (
     void
@@ -1208,29 +1208,29 @@ rxpkt_handler
         {
             g_mac.first_rx_desc_index = 0;
         }
-        
-        /* Clear the rx packet received interrupt once. If this 
-           bit still persists, then another rx packet received 
+
+        /* Clear the rx packet received interrupt once. If this
+           bit still persists, then another rx packet received
            interrupt will be generated. Rx count will be decremented.*/
         set_bit_reg32(&MAC->DMA_RX_STATUS, DMA_RXPKTRCVD);
         /* Get the latest current received count */
         rxcnt = (MAC->DMA_RX_STATUS & DMA_PKTCOUNT_MASK) >> DMA_PKTCOUNT;
- 
+
         ++g_mac.nb_available_rx_desc;
         /* Pass received packet up to application layer. */
         if(NULL_POINTER != g_mac.pckt_rx_callback)
         {
             uint8_t * p_rx_packet;
             uint32_t pckt_length;
-            
+
             p_rx_packet = cdesc->pkt_start_addr;
             pckt_length = (cdesc->pkt_size & DMA_DESC_PKT_SIZE_MASK) - 4u;
             if(NULL_POINTER != g_mac.pckt_rx_callback)
             {
                 g_mac.pckt_rx_callback(p_rx_packet, pckt_length, cdesc->caller_info);
             }
-        }       
-       
+        }
+
     } while(0u != rxcnt);
 }
 
@@ -1239,7 +1239,7 @@ rxpkt_handler
  * descriptor that transmitted the packet and caused the interrupt.
  * This relinquishes the packet buffer from the associated DMA descriptor.
  */
-static void 
+static void
 txpkt_handler
 (
     void
@@ -1248,10 +1248,10 @@ txpkt_handler
     uint32_t empty_flag;
     int16_t index;
     uint32_t completed = 0u;
-        
+
     ASSERT(g_mac.first_tx_index != INVALID_INDEX);
     ASSERT(g_mac.last_tx_index != INVALID_INDEX);
-    
+
     index = g_mac.first_tx_index;
     do
     {
@@ -1261,7 +1261,7 @@ txpkt_handler
         {
             g_mac.tx_complete_handler(g_mac.tx_desc_tab[index].caller_info);
         }
-        
+
         if(index == g_mac.last_tx_index)
         {
             /* all pending tx packets sent. */
@@ -1278,7 +1278,7 @@ txpkt_handler
                 index = 0;
             }
             g_mac.first_tx_index = index;
-            
+
             /* Check if we reached a descriptor still pending tx. */
             empty_flag = g_mac.tx_desc_tab[index].pkt_size & DMA_DESC_EMPTY_FLAG_MASK;
             if(0u == empty_flag)
@@ -1286,8 +1286,8 @@ txpkt_handler
                 completed = 1u;
             }
         }
-        
-        
+
+
         /* Clear the tx packet sent interrupt. Please note that this must be
          * done for every packet sent as it decrements the TXPKTCOUNT. */
         set_bit_reg32(&MAC->DMA_TX_STATUS, DMA_TXPKTSENT);
@@ -1295,12 +1295,12 @@ txpkt_handler
 }
 
 /**************************************************************************//**
- * 
+ *
  */
 static void tx_desc_ring_init(void)
 {
     int32_t inc;
-    
+
     for(inc = 0; inc < MSS_MAC_TX_RING_SIZE; ++inc)
     {
         g_mac.tx_desc_tab[inc].pkt_start_addr = 0u;
@@ -1318,12 +1318,12 @@ static void tx_desc_ring_init(void)
 }
 
 /**************************************************************************//**
- * 
+ *
  */
 static void rx_desc_ring_init(void)
 {
     int32_t inc;
-    
+
     for(inc = 0; inc < MSS_MAC_RX_RING_SIZE; ++inc)
     {
         g_mac.rx_desc_tab[inc].pkt_start_addr = 0u;
@@ -1341,7 +1341,7 @@ static void rx_desc_ring_init(void)
 }
 
 /**************************************************************************//**
- * 
+ *
  */
 static void assign_station_addr
 (
@@ -1380,11 +1380,11 @@ static uint8_t probe_phy(void)
     const uint16_t ALL_BITS_HIGH = 0xffffU;
     const uint8_t PHYREG_PHYID1R = 0x02U;   /* PHY Identifier 1 register address. */
     uint32_t found;
-    
+
     do
     {
         uint16_t reg;
-        
+
         reg = MSS_MAC_read_phy_reg(phy_address, PHYREG_PHYID1R);
         if (reg != ALL_BITS_HIGH)
         {
@@ -1396,8 +1396,8 @@ static uint8_t probe_phy(void)
             ++phy_address;
         }
     }
-    while ((phy_address <= PHY_ADDRESS_MAX) && (0U == found));    
-    
+    while ((phy_address <= PHY_ADDRESS_MAX) && (0U == found));
+
     return phy_address;
 }
 
@@ -1408,11 +1408,11 @@ static uint8_t probe_phy(void)
 static void msgmii_init(void)
 {
     uint16_t phy_reg;
-    
+
     /* Reset M-SGMII. */
     MSS_MAC_write_phy_reg(SF2_MSGMII_PHY_ADDR, 0x00, 0x9000u);
     /* Register 0x04 of M-SGMII must be always be set to 0x0001. */
-    MSS_MAC_write_phy_reg(SF2_MSGMII_PHY_ADDR, 0x04, 0x0001);    
+    MSS_MAC_write_phy_reg(SF2_MSGMII_PHY_ADDR, 0x04, 0x0001);
     /* Enable auto-negotiation inside SmartFusion2 SGMII block. */
     phy_reg = MSS_MAC_read_phy_reg(SF2_MSGMII_PHY_ADDR, 0x00);
     phy_reg |= 0x1000;
@@ -1429,15 +1429,15 @@ static void msgmii_init(void)
     uint8_t link_fullduplex;
     mss_mac_speed_t link_speed;
     uint8_t copper_link_up;
-    
+
     volatile uint32_t sgmii_aneg_timeout = 100000u;
 
     copper_link_up = MSS_MAC_phy_get_link_status(&link_speed, &link_fullduplex);
-    
+
     if(MSS_MAC_LINK_UP == copper_link_up)
     {
         SYSREG->MAC_CR = (SYSREG->MAC_CR & ~MAC_CONFIG_SPEED_MASK) | link_speed;
-        
+
         /* Configure duplex mode */
         if(MSS_MAC_HALF_DUPLEX == link_fullduplex)
         {
@@ -1448,15 +1448,15 @@ static void msgmii_init(void)
         {
             /* full duplex */
             MAC->CFG2 |= CFG2_FDX_MASK;
-        }    
-       
+        }
+
         /* Initiate auto-negotiation on the SGMII link. */
         phy_reg = MSS_MAC_read_phy_reg(SF2_MSGMII_PHY_ADDR, 0x00);
         phy_reg |= 0x1000;
         MSS_MAC_write_phy_reg(SF2_MSGMII_PHY_ADDR, 0x00, phy_reg);
         phy_reg |= 0x0200;
         MSS_MAC_write_phy_reg(SF2_MSGMII_PHY_ADDR, 0x00, phy_reg);
-        
+
         /* Wait for SGMII auto-negotiation to complete. */
         do {
             phy_reg = MSS_MAC_read_phy_reg(SF2_MSGMII_PHY_ADDR, MII_BMSR);
@@ -1508,7 +1508,7 @@ static void corergmii_set_link_speed(uint32_t speed)
 static void coresgmii_init(void)
 {
     uint16_t phy_reg;
-    
+
 #if (MSS_MAC_PHY_INTERFACE == SGMII)
     /* Reset C-SGMII. */
     MSS_MAC_write_phy_reg(CORE_SGMII_PHY_ADDR, 0x00, 0x9000u);
@@ -1520,7 +1520,7 @@ static void coresgmii_init(void)
     /* Reset C-SGMII. */
     MSS_MAC_write_phy_reg(CORE_SGMII_PHY_ADDR, 0x00, 0x8000u);
     /*Configure C-SGMII 1000BaseX Advertisement reg*/
-    MSS_MAC_write_phy_reg(CORE_SGMII_PHY_ADDR, MII_ADVERTISE, 0x0020u);    
+    MSS_MAC_write_phy_reg(CORE_SGMII_PHY_ADDR, MII_ADVERTISE, 0x0020u);
     /*Configure C-SGMII TBI control reg for 1000BaseX*/
     MSS_MAC_write_phy_reg(CORE_SGMII_PHY_ADDR, 0x11, 0x0800u);
 #endif /* #if (MSS_MAC_PHY_INTERFACE == BASEX1000) */
@@ -1533,24 +1533,24 @@ static void coresgmii_init(void)
 
 /***************************************************************************//**
  *
- */ 
+ */
 static void coresgmii_autonegotiate(void)
 {
     uint16_t phy_reg;
     uint16_t autoneg_complete;
     volatile uint32_t sgmii_aneg_timeout = 1000000u;
-    
+
 #if (MSS_MAC_PHY_INTERFACE == SGMII)
     uint8_t link_fullduplex;
     mss_mac_speed_t link_speed;
     uint8_t copper_link_up;
-     
+
     copper_link_up = MSS_MAC_phy_get_link_status(&link_speed, &link_fullduplex);
-    
+
     if(MSS_MAC_LINK_UP == copper_link_up)
     {
         SYSREG->MAC_CR = (SYSREG->MAC_CR & ~MAC_CONFIG_SPEED_MASK) | link_speed;
-        
+
         /* Configure duplex mode */
         if(MSS_MAC_HALF_DUPLEX == link_fullduplex)
         {
@@ -1561,14 +1561,14 @@ static void coresgmii_autonegotiate(void)
         {
             /* full duplex */
             MAC->CFG2 |= CFG2_FDX_MASK;
-        }  
+        }
         /* Initiate auto-negotiation on the SGMII link. */
         phy_reg = MSS_MAC_read_phy_reg(CORE_SGMII_PHY_ADDR, 0x00);
         phy_reg |= 0x1000;
         MSS_MAC_write_phy_reg(CORE_SGMII_PHY_ADDR, 0x00, phy_reg);
         phy_reg |= 0x0200;
         MSS_MAC_write_phy_reg(CORE_SGMII_PHY_ADDR, 0x00, phy_reg);
-    
+
         /* Wait for SGMII auto-negotiation to complete. */
         do {
             phy_reg = MSS_MAC_read_phy_reg(CORE_SGMII_PHY_ADDR, MII_BMSR);
@@ -1659,7 +1659,7 @@ static uint8_t coresgmii_get_link_status
 }
 #endif /* #if (MSS_MAC_PHY_INTERFACE == BASEX1000) */
 #endif /* #if (MSS_MAC_PHY_INTERFACE == SGMII) ||(MSS_MAC_PHY_INTERFACE == BASEX1000) */
- 
+
 #ifdef __cplusplus
 }
 #endif

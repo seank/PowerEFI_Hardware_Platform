@@ -1,18 +1,18 @@
 /*******************************************************************************
  * (c) Copyright 2008-2015 Microsemi SoC Products Group.  All rights reserved.
- * 
+ *
  * SmartFusion2 MSS RTC bare metal driver implementation.
  *
  * SVN $Revision: 7684 $
  * SVN $Date: 2015-08-24 16:58:16 +0530 (Mon, 24 Aug 2015) $
  */
 #include "mss_rtc.h"
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 #include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*-------------------------------------------------------------------------*//**
  * CONTROL_REG register masks.
@@ -76,7 +76,7 @@ static void add_alarm_cfg_values
     uint8_t calendar_item,
     uint32_t * p_calendar_value,
     uint32_t * p_compare_mask
-    
+
 );
 
 /*-------------------------------------------------------------------------*//**
@@ -95,10 +95,10 @@ MSS_RTC_init
     {
         /* Stop the RTC. */
         MSS_RTC_stop();
-        
+
         /* Disable alarm. */
         RTC->CONTROL_REG = CONTROL_ALARM_OFF_MASK;
-        
+
         /* Disable Interrupt */
         MSS_RTC_disable_irq();
         NVIC_ClearPendingIRQ(RTC_Wakeup_IRQn);
@@ -108,7 +108,7 @@ MSS_RTC_init
 
         /* Enable the RTC to interrupt the Cortex-M3. */
         SYSREG->RTC_WAKEUP_CR |= SYSREG_RTC_WAKEUP_M3_EN_MASK;
-        
+
         /* Select mode of operation, including the wake configuration. */
         if(MSS_RTC_CALENDAR_MODE == mode)
         {
@@ -118,7 +118,7 @@ MSS_RTC_init
         {
             RTC->MODE_REG = 0u;
         }
-        
+
         /* Reset the alarm and compare registers to a known value. */
         RTC->ALARM_LOWER_REG = 0u;
         RTC->ALARM_UPPER_REG = 0u;
@@ -144,7 +144,7 @@ MSS_RTC_set_calendar_count
 {
     uint8_t error = 0u;
     uint8_t clock_mode;
-    
+
     const uint8_t g_rtc_max_count_lut[] =
     {
        /* Calendar mode */
@@ -170,7 +170,7 @@ MSS_RTC_set_calendar_count
         1u, /* Weekdays*/
         1u  /* Week    */
     };
-    
+
     /* Assert if the values cross the limit */
     ASSERT(new_rtc_value->second >= g_rtc_min_count_lut[SECONDS]);
     ASSERT(new_rtc_value->second <= g_rtc_max_count_lut[SECONDS]);
@@ -206,19 +206,19 @@ MSS_RTC_set_calendar_count
     if(new_rtc_value->week < g_rtc_min_count_lut[WEEKS]) {error = 1u;}
     if(new_rtc_value->week > g_rtc_max_count_lut[WEEKS]) {error = 1u;}
 
-    /* 
+    /*
      * This function can only be used when the RTC is configured to operate in
-     * calendar counter mode. 
+     * calendar counter mode.
      */
     clock_mode = get_clock_mode();
     ASSERT(MSS_RTC_CALENDAR_MODE == clock_mode);
-    
+
     if((0u == error) && (MSS_RTC_CALENDAR_MODE == clock_mode))
     {
         uint32_t upload_in_progress;
-        
+
         /*
-         * Write the RTC new value. 
+         * Write the RTC new value.
          */
         RTC->SECONDS_REG = new_rtc_value->second;
         RTC->MINUTES_REG = new_rtc_value->minute;
@@ -231,7 +231,7 @@ MSS_RTC_set_calendar_count
 
         /* Data is copied, now issue upload command */
         RTC->CONTROL_REG = CONTROL_UPLOAD_MASK ;
-        
+
         /* Wait for the upload to complete. */
         do {
             upload_in_progress = RTC->CONTROL_REG & CONTROL_UPLOAD_MASK;
@@ -250,17 +250,17 @@ MSS_RTC_set_binary_count
 {
     uint8_t clock_mode;
 
-    /* 
+    /*
      * This function can only be used when the RTC is configured to operate in
-     * binary counter mode. 
+     * binary counter mode.
      */
     clock_mode = get_clock_mode();
     ASSERT(MSS_RTC_BINARY_MODE == clock_mode);
-    
+
     if(MSS_RTC_BINARY_MODE == clock_mode)
     {
         uint32_t rtc_upper_32_bit_value;
-        
+
         rtc_upper_32_bit_value = (uint32_t)(new_rtc_value >> 32u) & MASK_32_BIT;
 
         /* Assert if the values cross the limit */
@@ -269,9 +269,9 @@ MSS_RTC_set_binary_count
         if(rtc_upper_32_bit_value <= MAX_BINARY_HIGHER_COUNT)
         {
             uint32_t upload_in_progress;
-            
+
             /*
-             * Write the RTC new value. 
+             * Write the RTC new value.
              */
             RTC->DATE_TIME_LOWER_REG = (uint32_t)new_rtc_value;
             RTC->DATE_TIME_UPPER_REG =
@@ -279,7 +279,7 @@ MSS_RTC_set_binary_count
 
             /* Data is copied, now issue upload command */
             RTC->CONTROL_REG = CONTROL_UPLOAD_MASK;
-            
+
             /* Wait for the upload to complete. */
             do {
                 upload_in_progress = RTC->CONTROL_REG & CONTROL_UPLOAD_MASK;
@@ -298,13 +298,13 @@ MSS_RTC_get_calendar_count
 )
 {
     uint8_t clock_mode;
-    /* 
+    /*
      * This function can only be used when the RTC is configured to operate in
-     * calendar counter mode. 
+     * calendar counter mode.
      */
     clock_mode = get_clock_mode();
     ASSERT(MSS_RTC_CALENDAR_MODE == clock_mode);
-    
+
     if(MSS_RTC_CALENDAR_MODE == clock_mode)
     {
         p_rtc_calendar->second = (uint8_t)RTC->SECONDS_REG;
@@ -339,13 +339,13 @@ MSS_RTC_get_binary_count
     uint64_t rtc_count;
     uint8_t clock_mode;
 
-    /* 
+    /*
      * This function can only be used when the RTC is configured to operate in
-     * binary counter mode. 
+     * binary counter mode.
      */
     clock_mode = get_clock_mode();
     ASSERT(MSS_RTC_BINARY_MODE == clock_mode);
-    
+
     if(MSS_RTC_BINARY_MODE == clock_mode)
     {
         rtc_count = RTC->DATE_TIME_LOWER_REG;
@@ -372,7 +372,7 @@ static void add_alarm_cfg_values
     uint8_t calendar_item,
     uint32_t * p_calendar_value,
     uint32_t * p_compare_mask
-    
+
 )
 {
     if(MSS_RTC_CALENDAR_DONT_CARE == calendar_item)
@@ -398,7 +398,7 @@ void MSS_RTC_set_calendar_count_alarm
     uint32_t calendar_value;
     uint32_t compare_mask;
     uint8_t mode;
-    
+
     mode = (uint8_t)(RTC->MODE_REG & MODE_CLK_MODE_MASK);
     /*
      * This function can only be used with the RTC set to operate in calendar
@@ -408,14 +408,14 @@ void MSS_RTC_set_calendar_count_alarm
     if(MSS_RTC_CALENDAR_MODE == mode)
     {
         uint8_t required_mode_reg;
-        
+
         /* Disable the alarm before updating*/
         RTC->CONTROL_REG = CONTROL_ALARM_OFF_MASK;
 
         /* Set alarm and compare lower registers. */
         calendar_value = 0u;
         compare_mask = 0u;
-        
+
         add_alarm_cfg_values(alarm_value->day, &calendar_value, &compare_mask);
         add_alarm_cfg_values(alarm_value->hour, &calendar_value, &compare_mask);
         add_alarm_cfg_values(alarm_value->minute, &calendar_value, &compare_mask);
@@ -427,7 +427,7 @@ void MSS_RTC_set_calendar_count_alarm
         /* Set alarm and compare upper registers. */
         calendar_value = 0u;
         compare_mask = 0u;
-        
+
         add_alarm_cfg_values(alarm_value->week, &calendar_value, &compare_mask);
         add_alarm_cfg_values(alarm_value->weekday, &calendar_value, &compare_mask);
         add_alarm_cfg_values(alarm_value->year, &calendar_value, &compare_mask);
@@ -435,11 +435,11 @@ void MSS_RTC_set_calendar_count_alarm
 
         RTC->ALARM_UPPER_REG = calendar_value;
         RTC->COMPARE_UPPER_REG = compare_mask;
-        
+
         /* Configure the RTC to enable the alarm. */
         required_mode_reg = mode | MODE_WAKEUP_EN_MASK | MODE_WAKEUP_CONTINUE_MASK;
         set_rtc_mode(required_mode_reg);
-        
+
         /* Enable the alarm */
         RTC->CONTROL_REG = CONTROL_ALARM_ON_MASK ;
     }
@@ -481,7 +481,7 @@ void MSS_RTC_set_binary_count_alarm
 )
 {
     uint8_t mode;
-    
+
     mode = (uint8_t)(RTC->MODE_REG & MODE_CLK_MODE_MASK);
     /*
      * This function can only be used with the RTC set to operate in binary
@@ -491,7 +491,7 @@ void MSS_RTC_set_binary_count_alarm
     if(MSS_RTC_BINARY_MODE == mode)
     {
         uint8_t required_mode_reg;
-        
+
         /* Disable the alarm before updating*/
         RTC->CONTROL_REG = CONTROL_ALARM_OFF_MASK;
 
@@ -515,7 +515,7 @@ void MSS_RTC_set_binary_count_alarm
             required_mode_reg |= MODE_WAKEUP_RESET_MASK;
         }
         set_rtc_mode(required_mode_reg);
-        
+
         /* Enable the alarm */
         RTC->CONTROL_REG = CONTROL_ALARM_ON_MASK;
     }
@@ -543,13 +543,13 @@ MSS_RTC_stop
 )
 {
     uint32_t rtc_running;
-    
+
     /*
      * Send command to stop RTC.
      */
     RTC->CONTROL_REG = CONTROL_RTC_STOP_MASK;
-    
-    /* 
+
+    /*
      * Wait for RTC internal synchronization to take place and RTC to actually
      * stop.
      */
@@ -568,9 +568,9 @@ MSS_RTC_reset_counter
 )
 {
     uint32_t upload_in_progress;
-    
+
     RTC->CONTROL_REG = CONTROL_RESET_MASK;
-    
+
     /* Wait for the upload to complete. */
     do {
         upload_in_progress = RTC->CONTROL_REG & CONTROL_UPLOAD_MASK;
@@ -606,7 +606,7 @@ void MSS_RTC_enable_irq(void)
      * The RTC level interrupt enable is performed within the alarm setting
      * functions.
      * This avoid the MODE register being modified whenever Cortex-M3 RTC
-     * interrupts are enabled/disabled. 
+     * interrupts are enabled/disabled.
      */
     NVIC_EnableIRQ(RTC_Wakeup_IRQn);
 }
@@ -623,7 +623,7 @@ MSS_RTC_disable_irq
     /*
      * Only the NVIC level interrupt disable is performed within this function.
      * This avoid the MODE register being modified whenever Cortex-M3 RTC
-     * interrupts are enabled/disabled. 
+     * interrupts are enabled/disabled.
      */
     NVIC_DisableIRQ(RTC_Wakeup_IRQn);
 }
@@ -638,17 +638,17 @@ MSS_RTC_clear_irq
 )
 {
     volatile uint32_t dummy_read;
-    
+
     /* Clear wake up interrupt signal */
     RTC->CONTROL_REG = CONTROL_WAKEUP_CLR_MASK;
-    
+
     /*
     * Ensure that the posted write to the CONTROL_REG register completed before
     * returning from this function. Not doing this may result in the interrupt
     * only being cleared some time after this function returns.
     */
     dummy_read = RTC->CONTROL_REG;
-    
+
     /* Dummy operation to avoid warning message */
     ++dummy_read;
 }

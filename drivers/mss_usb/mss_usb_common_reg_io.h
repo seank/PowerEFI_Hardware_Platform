@@ -16,7 +16,7 @@
 #ifndef __MSS_USB_COMMON_REG_IO_H_
 #define __MSS_USB_COMMON_REG_IO_H_
 
-#include "../../CMSIS/m2sxxx.h"
+#include "CMSIS/m2sxxx.h"
 #include "mss_usb_core_regs.h"
 #include "mss_usb_common_cif.h"
 #include <stdint.h>
@@ -1230,7 +1230,7 @@ MSS_USB_CIF_dma_get_epnum
 )
 {
     /*
-    This API will return numbers from 0 to 15, mss_usb_ep_num_t maps it to TX_EP 
+    This API will return numbers from 0 to 15, mss_usb_ep_num_t maps it to TX_EP
     numbers. Using DMA DIR, CIF driver should correctly map it as TX EP or RX EP.
     */
     volatile uint8_t ep_num;

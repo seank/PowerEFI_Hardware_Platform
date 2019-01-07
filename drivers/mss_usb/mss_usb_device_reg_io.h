@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-#include "../../CMSIS/m2sxxx.h"
+#include "CMSIS/m2sxxx.h"
 #include "mss_usb_core_regs.h"
 
 

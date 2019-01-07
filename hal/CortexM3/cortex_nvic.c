@@ -1,6 +1,6 @@
 /*******************************************************************************
  * (c) Copyright 2007-2013 Microsemi SoC Products Group.  All rights reserved.
- * 
+ *
  * Legacy Actel HAL Cortex NVIC control functions.
  * The use of these functions should be replaced by calls to the equivalent
  * CMSIS function in your application code.
@@ -12,12 +12,12 @@
 #ifdef MSCC_NO_RELATIVE_PATHS
 #include "mss_assert.h"
 #else
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 #endif
 
 
 /***************************************************************************//**
- * 
+ *
  */
 void NVIC_init( void )
 {
@@ -32,7 +32,7 @@ void NVIC_init( void )
 }
 
 /***************************************************************************//**
- * 
+ *
  */
 void NVIC_set_handler
 (
@@ -73,7 +73,7 @@ void NVIC_set_handler
 }
 
 /***************************************************************************//**
- * 
+ *
  */
 void NVIC_set_priority
 (
@@ -110,7 +110,7 @@ void NVIC_set_priority
 }
 
 /***************************************************************************//**
- * 
+ *
  */
 void NVIC_enable_interrupt( uint32_t interrupt_number )
 {
@@ -143,7 +143,7 @@ void NVIC_enable_interrupt( uint32_t interrupt_number )
 }
 
 /***************************************************************************//**
- * 
+ *
  */
 void NVIC_disable_interrupt( uint32_t interrupt_number )
 {
@@ -176,7 +176,7 @@ void NVIC_disable_interrupt( uint32_t interrupt_number )
 }
 
 /***************************************************************************//**
- * 
+ *
  */
 void NVIC_clear_interrupt( uint32_t interrupt_number )
 {

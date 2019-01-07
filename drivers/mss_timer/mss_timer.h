@@ -1,6 +1,6 @@
 /*******************************************************************************
  * (c) Copyright 2010-2015 Microsemi SoC Products Group.  All rights reserved.
- * 
+ *
  * SmartFusion2 microcontroller subsystem (MSS) timer driver API.
  *
  * SVN $Revision: 7258 $
@@ -12,14 +12,14 @@
   @section intro_sec Introduction
   The SmartFusion2 Microcontroller Subsystem (MSS) includes a timer hardware
   block which can be used as two independent 32-bits timers or as a single
-  64-bits timer in periodic or one-shot mode. 
+  64-bits timer in periodic or one-shot mode.
 
   This driver provides a set of functions for controlling the MSS timer as part
   of a bare metal system where no operating system is available. These drivers
   can be adapted for use as part of an operating system but the implementation
   of the adaptation layer between this driver and the operating system's driver
   model is outside the scope of this driver.
-  
+
   @section theory_op Theory of Operation
   The MSS Timer driver uses the SmartFusion2 "Cortex Microcontroler Software
   Interface Standard - Peripheral Access Layer" (CMSIS-PAL) to access hardware
@@ -36,12 +36,12 @@
   configured for one-shot mode will only generate an interrupt once when its
   down-counter reaches 0. It must be explicitly reloaded to start decrementing
   again.
-  
+
   The MSS Timer driver functions are grouped into the following categories:
     - Initialization and Configuration
     - Timer control
     - Interrupt control
-  
+
   The MSS Timer driver provides three initialization functions:
     - MSS_TIM1_init()
     - MSS_TIM2_init()
@@ -54,7 +54,7 @@
   you intend to use the MSS Timer as a single 64-bits timer. The initialization
   functions take a single parameter specifying the operating mode of the timer
   being initialized.
-  
+
   Once initialized a timer can be controlled using the following functions:
     - MSS_TIM1_load_immediate()
     - MSS_TIM1_load_background()
@@ -71,7 +71,7 @@
     - MSS_TIM64_get_current_value()
     - MSS_TIM64_start()
     - MSS_TIM64_stop()
-  
+
   Timer interrupts are controlled using the following functions:
     - MSS_TIM1_enable_irq()
     - MSS_TIM1_disable_irq()
@@ -82,7 +82,7 @@
     - MSS_TIM64_enable_irq()
     - MSS_TIM64_disable_irq()
     - MSS_TIM64_clear_irq()
-  
+
   The function prototypes for the timer interrupt handlers are:
     - void Timer1_IRQHandler( void )
     - void Timer2_IRQHandler( void )
@@ -94,17 +94,17 @@
   you must implement a Timer1_IRQHandler( ) function as part of your
   application code. The Timer 2 interrupt is not used when the MSS Timer is
   configured as a 64-bit timer.
-  
+
  *//*=========================================================================*/
 #ifndef MSS_TIMER_H_
 #define MSS_TIMER_H_
 
 
-#include "../../CMSIS/m2sxxx.h"
+#include "CMSIS/m2sxxx.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*-------------------------------------------------------------------------*//**
  * Timer mode selection. This enumeration is used to select between the two
@@ -112,7 +112,7 @@ extern "C" {
  * an argument to the MSS_TIM1_init(), MSS_TIM2_init() and MSS_TIM64_init()
  * functions.
  * MSS_TIMER_PERIODIC_MODE:
- *  In periodic mode the timer generates interrupts at constant intervals. On 
+ *  In periodic mode the timer generates interrupts at constant intervals. On
  *  reaching zero, the timer's counter is reloaded with a value held in a
  *  register and begins counting down again.
  * MSS_TIMER_ONE_SHOT_MODE:
@@ -128,12 +128,12 @@ typedef enum __mss_timer_mode_t
 /*-------------------------------------------------------------------------*//**
   The MSS_TIM1_init() function initializes the SmartFusion2 MSS Timer block for
   use as a 32-bit timer and selects the operating mode for Timer 1. This function
-  takes the MSS Timer block out of reset in case this hasn’t been done already,
+  takes the MSS Timer block out of reset in case this hasnï¿½t been done already,
   stops Timer 1, disables its interrupt and sets the Timer 1 operating mode.
   Please note that the SmartFusion2 MSS Timer block cannot be used both as a
   64-bit and 32-bit timer. Calling MSS_TIM1_init() will overwrite any previous
   configuration of the MSS Timer as a 64-bit timer.
- 
+
   @param mode
     The mode parameter specifies whether the timer will operate in periodic or
     one-shot mode. Allowed values for this parameter are:
@@ -142,16 +142,16 @@ typedef enum __mss_timer_mode_t
  */
 static __INLINE void MSS_TIM1_init(mss_timer_mode_t mode)
 {
-    NVIC_DisableIRQ(Timer1_IRQn);             /* Disable timer 1 irq in the Cortex-M3 NVIC */  
-    
+    NVIC_DisableIRQ(Timer1_IRQn);             /* Disable timer 1 irq in the Cortex-M3 NVIC */
+
     SYSREG->SOFT_RST_CR &= ~SYSREG_TIMER_SOFTRESET_MASK; /* Take timer block out of reset */
-    
+
     TIMER->TIM64_MODE = 0u;                     /* switch to 32 bits mode */
-    
+
     TIMER_BITBAND->TIM1ENABLE = 0u;             /* disable timer */
     TIMER_BITBAND->TIM1INTEN = 0u;              /* disable interrupt */
     TIMER_BITBAND->TIM1MODE = (uint32_t)mode;   /* set mode (continuous/one-shot) */
-    
+
     TIMER->TIM1_RIS = 1u;                       /* clear timer 1 interrupt */
     NVIC_ClearPendingIRQ(Timer1_IRQn);          /* clear timer 1 interrupt within NVIC */
 }
@@ -159,7 +159,7 @@ static __INLINE void MSS_TIM1_init(mss_timer_mode_t mode)
 /*-------------------------------------------------------------------------*//**
   The MSS_TIM1_start() function enables Timer 1 and starts its down-counter
   decrementing from the load_value specified in previous calls to the
-  MSS_TIM1_load_immediate() or MSS_TIM1_load_background() functions. 
+  MSS_TIM1_load_immediate() or MSS_TIM1_load_background() functions.
   Note: The MSS_TIM1_start() function is also used to resume the down-counter
         if previously stopped using the MSS_TIM1_stop() function.
  */
@@ -180,7 +180,7 @@ static __INLINE void MSS_TIM1_stop(void)
 /*-------------------------------------------------------------------------*//**
   The MSS_TIM1_get_current_value() returns the current value of the Timer 1
   down-counter.
-  
+
   @return
     This function returns the 32-bits current value of the Timer 1 down-counter.
  */
@@ -191,17 +191,17 @@ static __INLINE uint32_t MSS_TIM1_get_current_value(void)
 
 /*-------------------------------------------------------------------------*//**
   The MSS_TIM1_load_immediate() function loads the value passed by the
-  load_value parameter into the Timer 1 down-counter. The counter will 
-  decrement immediately from this value once Timer 1 is enabled. The MSS 
+  load_value parameter into the Timer 1 down-counter. The counter will
+  decrement immediately from this value once Timer 1 is enabled. The MSS
   Timer will generate an interrupt when the counter reaches zero, if Timer 1
   interrupts are enabled. This function is intended to be used when Timer 1
   is configured for one-shot mode to time a single delay.
   Note: The value passed by the load_value parameter is loaded immediately
         into the down-counter regardless of whether Timer 1 is operating in
         periodic or one-shot mode.
-  
+
   @param load_value
-    The load_value parameter specifies the value from which the Timer 1 
+    The load_value parameter specifies the value from which the Timer 1
     down-counter will start decrementing from.
  */
 static __INLINE void MSS_TIM1_load_immediate(uint32_t load_value)
@@ -215,7 +215,7 @@ static __INLINE void MSS_TIM1_load_immediate(uint32_t load_value)
   zero. This function is typically used when Timer 1 is configured for periodic
   mode operation to select or change the delay period between the interrupts
   generated by Timer 1.
- 
+
   @param load_value
     The load_value parameter specifies the value that will be loaded into the
     Timer 1 down-counter the next time the down-counter reaches zero. The Timer
@@ -269,9 +269,9 @@ static __INLINE void MSS_TIM1_clear_irq(void)
 {
     TIMER->TIM1_RIS = 1u;
     /*
-      To ensure all the previous instructions are completed, data barrier 
-      instruction is used. The “dsb” data barriers instruction completes,
-      only after all the previous instruction are completed. 
+      To ensure all the previous instructions are completed, data barrier
+      instruction is used. The ï¿½dsbï¿½ data barriers instruction completes,
+      only after all the previous instruction are completed.
      */
     __ASM volatile ("dsb");
 }
@@ -279,30 +279,30 @@ static __INLINE void MSS_TIM1_clear_irq(void)
 /*-------------------------------------------------------------------------*//**
   The MSS_TIM2_init() function initializes the SmartFusion2 MSS Timer block for
   use as a 32-bit timer and selects the operating mode for Timer 2. This function
-  takes the MSS Timer block out of reset in case this hasn’t been done already,
+  takes the MSS Timer block out of reset in case this hasnï¿½t been done already,
   stops Timer 2, disables its interrupt and sets the Timer 2 operating mode.
   Note: Please note that the SmartFusion2 MSS Timer block cannot be used both as
   a 64-bit and 32-bit timer. Calling MSS_TIM2_init() will overwrite any previous
   configuration of the MSS Timer as a 64-bit timer.
-  
+
   @param mode
     The mode parameter specifies whether the timer will operate in periodic or
     one-shot mode. Allowed values for this parameter are:
         - MSS_TIMER_PERIODIC_MODE
-        - MSS_TIMER_ONE_SHOT_MODE 
+        - MSS_TIMER_ONE_SHOT_MODE
  */
 static __INLINE void MSS_TIM2_init(mss_timer_mode_t mode)
 {
-    NVIC_DisableIRQ(Timer2_IRQn);             /* Disable timer 2 irq in the Cortex-M3 NVIC */  
-    
+    NVIC_DisableIRQ(Timer2_IRQn);             /* Disable timer 2 irq in the Cortex-M3 NVIC */
+
     SYSREG->SOFT_RST_CR &= ~SYSREG_TIMER_SOFTRESET_MASK; /* Take timer block out of reset */
-    
+
     TIMER->TIM64_MODE = 0u;                     /* switch to 32 bits mode */
-    
+
     TIMER_BITBAND->TIM2ENABLE = 0u;             /* disable timer */
     TIMER_BITBAND->TIM2INTEN = 0u;              /* disable interrupt */
     TIMER_BITBAND->TIM2MODE = (uint32_t)mode;   /* set mode (continuous/one-shot) */
-    
+
     TIMER->TIM2_RIS = 1u;                       /* clear timer 2 interrupt */
     NVIC_ClearPendingIRQ(Timer2_IRQn);        /* clear timer 2 interrupt within NVIC */
 }
@@ -310,8 +310,8 @@ static __INLINE void MSS_TIM2_init(mss_timer_mode_t mode)
 /*-------------------------------------------------------------------------*//**
   The MSS_TIM2_start() function enables Timer 2 and  starts its down-counter
   decrementing from the load_value specified in previous calls to the
-  MSS_TIM2_load_immediate() or MSS_TIM2_load_background() functions. 
-  Note: The MSS_TIM2_start() function is also used to resume the down-counter 
+  MSS_TIM2_load_immediate() or MSS_TIM2_load_background() functions.
+  Note: The MSS_TIM2_start() function is also used to resume the down-counter
         if previously stopped using the MSS_TIM2_stop() function.
  */
 static __INLINE void MSS_TIM2_start(void)
@@ -339,18 +339,18 @@ static __INLINE uint32_t MSS_TIM2_get_current_value(void)
 
 /*-------------------------------------------------------------------------*//**
   The MSS_TIM2_load_immediate() function loads the value passed by the
-  load_value parameter into the Timer 2 down-counter. The counter will 
+  load_value parameter into the Timer 2 down-counter. The counter will
   decrement immediately from this value once Timer 2 is enabled. The MSS Timer
-  will generate an interrupt when the counter reaches zero if Timer 2 
+  will generate an interrupt when the counter reaches zero if Timer 2
   interrupts are enabled. This function is intended to be used when Timer 2
   is configured for one-shot mode to time a single delay.
   Note: The value passed by the load_value parameter is loaded immediately into
         the down-counter regardless of whether Timer 2 is operating in periodic
         or one-shot mode.
-  
+
   @param load_value
     The load_value parameter specifies the value from which the Timer 2
-    down-counter will start decrementing. 
+    down-counter will start decrementing.
  */
 static __INLINE void MSS_TIM2_load_immediate(uint32_t load_value)
 {
@@ -363,7 +363,7 @@ static __INLINE void MSS_TIM2_load_immediate(uint32_t load_value)
   zero. This function is typically used when Timer 2 is configured for periodic
   mode operation to select or change the delay period between the interrupts
   generated by Timer 2.
-  
+
   @param load_value
     The load_value parameter specifies the value that will be loaded into the
     Timer 2 down-counter the next time the down-counter reaches zero. The Timer
@@ -415,9 +415,9 @@ static __INLINE void MSS_TIM2_clear_irq(void)
 {
     TIMER->TIM2_RIS = 1u;
     /*
-      To ensure all the previous instructions are completed, data barrier 
-      instruction is used. The “dsb” data barriers instruction completes,
-      only after all the previous instruction are completed. 
+      To ensure all the previous instructions are completed, data barrier
+      instruction is used. The ï¿½dsbï¿½ data barriers instruction completes,
+      only after all the previous instruction are completed.
      */
     __ASM volatile ("dsb");
 }
@@ -425,7 +425,7 @@ static __INLINE void MSS_TIM2_clear_irq(void)
 /*-------------------------------------------------------------------------*//**
   The MSS_TIM64_init() function initializes the SmartFusion2 MSS Timer block for
   use as a single 64-bit timer and selects the operating mode of the timer. This
-  function takes the MSS Timer block out of reset in case this hasn’t been done
+  function takes the MSS Timer block out of reset in case this hasnï¿½t been done
   already, stops the timer, disables its interrupts and sets the timer's
   operating mode.
   Note: Please note that the SmartFusion2 MSS Timer block cannot be used both as
@@ -436,21 +436,21 @@ static __INLINE void MSS_TIM2_clear_irq(void)
     The mode parameter specifies whether the timer will operate in periodic or
     one-shot mode. Allowed values for this parameter are:
         - MSS_TIMER_PERIODIC_MODE
-        - MSS_TIMER_ONE_SHOT_MODE 
+        - MSS_TIMER_ONE_SHOT_MODE
  */
 static __INLINE void MSS_TIM64_init(mss_timer_mode_t mode)
 {
     NVIC_DisableIRQ(Timer1_IRQn);         /* disable timer 1 interrupt within NVIC */
     NVIC_DisableIRQ(Timer2_IRQn);         /* disable timer 2 interrupt within NVIC */
-    
+
     SYSREG->SOFT_RST_CR &= ~SYSREG_TIMER_SOFTRESET_MASK; /* Take timer block out of reset */
-    
+
     TIMER->TIM64_MODE = 1u;                     /* switch to 64 bits mode */
-    
+
     TIMER_BITBAND->TIM64ENABLE = 0u;            /* disable timer */
     TIMER_BITBAND->TIM64INTEN = 0u;             /* disable interrupt */
     TIMER_BITBAND->TIM64MODE = (uint32_t)mode;  /* set mode (continuous/one-shot) */
-    
+
     TIMER->TIM1_RIS = 1u;                   /* clear timer 1 interrupt */
     TIMER->TIM2_RIS = 1u;                   /* clear timer 2 interrupt */
     NVIC_ClearPendingIRQ(Timer1_IRQn);    /* clear timer 1 interrupt within NVIC */
@@ -480,16 +480,16 @@ static __INLINE void MSS_TIM64_stop(void)
 
 /*-------------------------------------------------------------------------*//**
   The MSS_TIM64_get_current_value() is used to read the current value of the
-  64-bit timer down-counter. 
- 
+  64-bit timer down-counter.
+
   @param load_value_u
     The load_value_u parameter is a pointer to a 32-bit variable where the upper
     32 bits of the current value of the 64-bit timer down-counter will be copied.
-    
+
   @param load_value_l
     The load_value_l parameter is a pointer to a 32-bit variable where the lower
     32 bits of the current value of the 64-bit timer down-counter will be copied.
-    
+
   Example:
   @code
     uint32_t current_value_u = 0;
@@ -518,11 +518,11 @@ static __INLINE void MSS_TIM64_get_current_value
   Note: The value passed by the load_value parameter is loaded immediately into
         the down-counter regardless of whether the 64-bit timer is operating in
         periodic or one-shot mode.
- 
+
   @param load_value_u
     The load_value_u parameter specifies the upper 32 bits of the 64-bit timer
     load value from which the 64-bit timer down-counter will start decrementing.
-    
+
   @param load_value_l
     The load_value_l parameter specifies the lower 32 bits of the 64-bit timer
     load value from which the 64-bit timer down-counter will start decrementing.
@@ -543,7 +543,7 @@ static __INLINE void MSS_TIM64_load_immediate
   counter reaches zero. This function is typically used when the 64-bit timer is
   configured for periodic mode operation to select or change the delay period
   between the interrupts generated by the 64-bit timer.
- 
+
   @param load_value_u
     The load_value_u parameter specifies the upper 32 bits of the 64-bit timer
     load value. The concatenated 64-bit value formed from load_value_u and
@@ -551,7 +551,7 @@ static __INLINE void MSS_TIM64_load_immediate
     time the down-counter reaches zero. The 64-bit timer down-counter will start
     decrementing from the concatenated 64-bit value after the current count
     expires.
-    
+
   @param load_value_l
     The load_value_l parameter specifies the lower 32 bits of the 64-bit timer
     load value. The concatenated 64-bit value formed from load_value_u and
@@ -559,7 +559,7 @@ static __INLINE void MSS_TIM64_load_immediate
     the down-counter reaches zero. The 64-bit timer down-counter will start
     decrementing from the concatenated 64-bit value after the current count
     expires.
- 
+
  */
 static __INLINE void MSS_TIM64_load_background
 (
@@ -613,13 +613,13 @@ static __INLINE void MSS_TIM64_clear_irq(void)
 {
     TIMER->TIM64_RIS = 1u;
     /*
-      To ensure all the previous instructions are completed, data barrier 
-      instruction is used. The “dsb” data barriers instruction completes,
-      only after all the previous instruction are completed. 
+      To ensure all the previous instructions are completed, data barrier
+      instruction is used. The ï¿½dsbï¿½ data barriers instruction completes,
+      only after all the previous instruction are completed.
      */
     __ASM volatile ("dsb");
-    
-    
+
+
 }
 
 #ifdef __cplusplus

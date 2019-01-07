@@ -1,6 +1,6 @@
 /*******************************************************************************
  * (c) Copyright 2010-2015 Microsemi SoC Products Group.  All rights reserved.
- * 
+ *
  *  SmartFusion2 MSS HPDMA bare metal software driver public API.
  *
  * SVN $Revision: 7741 $
@@ -19,7 +19,7 @@
   available. The driver can be adapted for use as part of an operating system
   but the implementation of the adaptation layer between the driver and the
   operating system's driver model is outside the scope of the driver.
-  
+
   @section hw_dependencies Hardware Flow Dependencies
   The configuration of all features of the MSS HPDMA is covered by this driver.
   There are no dependencies on the hardware flow when configuring the MSS HPDMA.
@@ -28,44 +28,44 @@
   must ensure that the latest SmartFusion2 CMSIS HAL is included in the project
   settings of the software tool chain used to build your project and that it is
   generated into your project.
-  
+
   @section theory_op Theory of Operation
   The MSS HPDMA driver functions are grouped into the following categories:
     - Initialization of the MSS HPDMA driver and hardware
-    - Data transfer control 
+    - Data transfer control
     - Data transfer status
     - Interrupt handling
-    
+
   Initialization
   The MSS HPDMA driver is initialized through a call to the MSS_HPDMA_init()
   function. The MSS_HPDMA_init() function must be called before any other MSS
   HPDMA driver functions can be called.
-  
+
   Data Transfer Control
   The driver provides the following functions to control HPDMA data transfers:
-    - MSS_HPDMA_start()  – This function starts a HPDMA data transfer. You must
+    - MSS_HPDMA_start()  ï¿½ This function starts a HPDMA data transfer. You must
                            provide the source and destination addresses along
                            with transfer size and transfer direction.
-    - MSS_HPDMA_pause()  – This function pauses the HPDMA transfer that is
+    - MSS_HPDMA_pause()  ï¿½ This function pauses the HPDMA transfer that is
                            currently in progress.
-    - MSS_HPDMA_resume() – This function resumes a HPDMA transfer that was
+    - MSS_HPDMA_resume() ï¿½ This function resumes a HPDMA transfer that was
                            previously paused.
-    - MSS_HPDMA_abort()  – This function aborts the HPDMA transfer that is
+    - MSS_HPDMA_abort()  ï¿½ This function aborts the HPDMA transfer that is
                            currently in progress.
-    
+
   Data Transfer Status
   The status of the HPDMA transfer initiated by the last call to
   MSS_HPDMA_start() can be retrieved using the MSS_HPDMA_get_transfer_status()
   function.
-  
+
   Interrupt Handling
   The MSS_HPDMA_set_handler() function is used to register a handler function
   that will be called by the driver when the HPDMA transfer completes. The driver
-  passes the outcome of the transfer to the completion handler in the form of 
+  passes the outcome of the transfer to the completion handler in the form of
   a hpdma_status_t parameter indicating if the transfer was successful or the
   type of error that occurred during the transfer.You must create and register
   a transfer completion handler function to suit your application.
-  
+
 
  *//*=========================================================================*/
 #ifndef MSS_HPDMA_H_
@@ -73,9 +73,9 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
-#include "../../CMSIS/m2sxxx.h"
+#include "CMSIS/m2sxxx.h"
 
 /*-------------------------------------------------------------------------*//**
   The HPDMA_TO_DDR constant is used to specify the data transfer direction. It
@@ -99,7 +99,7 @@ extern "C" {
   transfer. This type is returned by the MSS_HPDMA_get_transfer_status()
   function and used as parameter to handler functions registered with the MSS
   HPDMA driver by the application.
-  
+
   - HPDMA_IN_PROGRESS       - A HPDMA transfer is taking place.
   - HPDMA_COMPLETED         - The most recent HPDMA transfer initiated by a call
                               to HPDMA_start() has completed successfully.
@@ -159,12 +159,12 @@ MSS_HPDMA_init
   or destination of the transfer. The HPDMA controller transfers data in 32-bit
   chunks located on 32-bit word aligned address boundaries.
 
-  Note: A call to MSS_HPDMA_start() while a transfer is in progress will not 
-  initiate a new transfer. Use the MSS_HPDMA_get_transfer_status() function 
+  Note: A call to MSS_HPDMA_start() while a transfer is in progress will not
+  initiate a new transfer. Use the MSS_HPDMA_get_transfer_status() function
   or a completion handler registered by the MSS_HPDMA_set_handler() function
-  to check the status of the current transfer before calling the 
+  to check the status of the current transfer before calling the
   MSS_HPDMA_start() function again.
-  
+
   @param src_addr
     The parameter src_addr is the address of the data that will be transferred
     by the HPDMA. This address must be 32-bit word aligned. The memory location
@@ -202,15 +202,15 @@ MSS_HPDMA_start
 /*-------------------------------------------------------------------------*//**
   The MSS_HPDMA_pause() function pauses the current HPDMA transfer. The HPDMA
   transfer can be resumed later  by calling MSS_HPDMA_resume().
-  
+
   Note: A HPDMA transfer can be paused by calling MSS_HPDMA_pause(). For a transfer
   that hasn't been completed yet, nor been terminated due to addressing errors,
   the MSS_HPDMA_get_transfer_status() function will return HPDMA_IN_PROGRESS
   as the status while the transfer is paused.
-    
+
   @param
     This function has no parameters.
-    
+
   @return
     This function does not return a value.
  */
@@ -224,14 +224,14 @@ MSS_HPDMA_pause
   The MSS_HPDMA_resume() function resumes the current HPDMA transfer after it was
   previously paused through a call to MSS_HPDMA_pause().
 
-  Note: If a HPDMA transfer is paused by calling MSS_HPDMA_pause(), and the 
+  Note: If a HPDMA transfer is paused by calling MSS_HPDMA_pause(), and the
   transfer hasn't yet completed, nor been terminated due to addressing errors,
   the MSS_HPDMA_get_transfer_status() function will return HPDMA_IN_PROGRESS
   as the status while the transfer is paused.
-  
+
   @param
     This function has no parameters.
-    
+
   @return
     This function does not return a value.
  */
@@ -246,7 +246,7 @@ MSS_HPDMA_resume
 
   @param
     This function has no parameters.
-    
+
   @return
     This function does not return a value.
  */
@@ -258,11 +258,11 @@ MSS_HPDMA_abort
 
 /*-------------------------------------------------------------------------*//**
  The MSS_HPDMA_get_transfer_status() function returns the status of the HPDMA
- transfer initiated by a call to MSS_HPDMA_start(). 
+ transfer initiated by a call to MSS_HPDMA_start().
 
   @param
     This function has no parameters.
-    
+
   @return
     The MSS_HPDMA_get_transfer_status() function returns the status of the HPDMA
     transfer as a value of  type hpdma_status_t. The possible return values are:
@@ -271,7 +271,7 @@ MSS_HPDMA_abort
         - HPDMA_SOURCE_ERROR
         - HPDMA_DESTINATION_ERROR
         - HPDMA_WORD_ALIGN_ERROR
-      
+
   The example code below demonstrates the use of the
   MSS_HPDMA_get_transfer_status() function to detect the completion of the
   transfer of the content of eNVM into MDDR memory.
@@ -282,7 +282,7 @@ MSS_HPDMA_abort
                         MDDR_BASE_ADDR,
                         ENVM_SIZE_BYTE,
                         HPDMA_TO_DDR);
-        
+
         do {
             xfer_state = MSS_HPDMA_get_transfer_status();
         } while(HPDMA_IN_PROGRESS == xfer_state);
@@ -312,7 +312,7 @@ MSS_HPDMA_get_transfer_status
 
   @return
     This function does not return a value.
-    
+
   This example code demonstrates the use of the MSS_HPDMA_set_handler()
   function:
   @code
@@ -323,15 +323,15 @@ MSS_HPDMA_get_transfer_status
     void demo_transfer(void)
     {
         MSS_HPDMA_init();
-        
+
         MSS_HPDMA_set_handler(transfer_complete_handler);
-        
+
         g_xfer_in_progress = 1;
         MSS_HPDMA_start((uint32_t)0x20000000,
                         (uint32_t)0xA0000000,
                         20,
                         HPDMA_FROM_DDR);
-        
+
         while(g_xfer_in_progress)
         {
             ;
@@ -341,7 +341,7 @@ MSS_HPDMA_get_transfer_status
     void transfer_complete_handler(hpdma_status_t status)
     {
         g_xfer_in_progress = 0;
-        
+
         switch(status)
         {
             case HPDMA_COMPLETED:

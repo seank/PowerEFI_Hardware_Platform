@@ -10,7 +10,7 @@
  * implements core interface function for the logical layer to control the
  * MSS USB core in USB Device mode.
  *
- * V2.4 Naming convention change, other cosmetic changes. 
+ * V2.4 Naming convention change, other cosmetic changes.
  * V2.3 Fixing printer driver overwriting buffer issue with receive endpoint
  * interrupt enable timing
  *
@@ -23,7 +23,7 @@
 #include "mss_usb_common_cif.h"
 #include "mss_usb_device_reg_io.h"
 #include "mss_usb_common_reg_io.h"
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 
 #ifdef __cplusplus
 extern "C" {

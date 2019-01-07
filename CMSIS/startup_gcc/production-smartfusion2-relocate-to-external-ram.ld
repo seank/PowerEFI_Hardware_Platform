@@ -73,9 +73,9 @@ MEMORY
 }
 
 ESRAM_START_ADDRESS = 0x20000000;   /* Must be the same value as MEMORY region esram ORIGIN above. */
-ESRAM_SIZE      = 64k;              /* Must be the same value as MEMORY region esram LENGTH above. */
-MAIN_STACK_SIZE = 64k;              /* Cortex main stack size. */
-MIN_SIZE_HEAP   = 64k;              /* needs to be calculated for your application */
+ESRAM_SIZE      = 60k;              /* Must be the same value as MEMORY region esram LENGTH above. */
+MAIN_STACK_SIZE = 60k;              /* Cortex main stack size. */
+MIN_SIZE_HEAP   = 60k;              /* needs to be calculated for your application */
 TOP_OF_MDDR     = 0xA4000000;       /* Top address of the external MDDR memory. */
 
 /*******************************************************************************

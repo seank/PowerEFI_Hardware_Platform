@@ -19,7 +19,7 @@
 #include "mss_usb_common_reg_io.h"
 #include "mss_usb_device_reg_io.h"
 #include "mss_usb_common_cif.h"
-#include "../../CMSIS/m2sxxx.h"
+#include "CMSIS/m2sxxx.h"
 
 #ifdef __cplusplus
 extern "C" {
