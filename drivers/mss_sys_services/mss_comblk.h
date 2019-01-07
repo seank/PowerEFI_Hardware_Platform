@@ -9,13 +9,13 @@
 #ifndef __MSS_COMBLK_H_
 #define __MSS_COMBLK_H_ 1
 
-#include "../../CMSIS/m2sxxx.h"
+#include "CMSIS/m2sxxx.h"
 #include "mss_comblk_page_handler.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-  
+
 /*------------------------------------------------------------------------------
  *
  */
@@ -28,7 +28,7 @@ typedef void (*comblk_async_event_handler_t)(uint8_t event_opcode);
  */
 void MSS_COMBLK_init
 (
-    comblk_async_event_handler_t async_event_handler, 
+    comblk_async_event_handler_t async_event_handler,
     uint8_t* p_response
 );
 

@@ -8,7 +8,8 @@
  */
 
 #include "mss_comblk.h"
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
+#include "drivers/mss_gpio/mss_gpio.h"
 
 /*==============================================================================
  *
@@ -88,15 +89,17 @@ void MSS_COMBLK_init
     uint8_t* p_response
 )
 {
+
+
     /*
      * Disable and clear previous interrupts.
      */
     NVIC_DisableIRQ(ComBlk_IRQn);
     COMBLK->INT_ENABLE = 0u;
     NVIC_ClearPendingIRQ(ComBlk_IRQn);
-    
+
     g_async_event_handler = async_event_handler;
-    
+
     /*
      * Initialize COMBLK driver state variables:
      */
@@ -110,17 +113,17 @@ void MSS_COMBLK_init
     g_comblk_response_size = 0u;
     g_comblk_response_idx = 0u;
     g_comblk_completion_handler = 0;
-    
+
     g_comblk_state = COMBLK_IDLE;
-    
+
     /*
      * Disable loopback before enabling the MSS COMM_BLK to ensure that any
-     * codes waiting in the TX FIFO of the System Controller’s COMM_BLK are
+     * codes waiting in the TX FIFO of the System Controllerï¿½s COMM_BLK are
      * not lost.
      */
     COMBLK->CONTROL &= ~CR_LOOPBACK_MASK;
     COMBLK->CONTROL |= CR_ENABLE_MASK;
-    
+
     /*--------------------------------------------------------------------------
      * Enable receive interrupt to receive asynchronous events from the system
      * controller.
@@ -143,19 +146,19 @@ void MSS_COMBLK_send_cmd_with_ptr
 )
 {
     uint32_t tx_okay;
-    
+
     /*--------------------------------------------------------------------------
      * Disable and clear previous interrupts.
      */
     NVIC_DisableIRQ(ComBlk_IRQn);
     COMBLK->INT_ENABLE = 0u;
     NVIC_ClearPendingIRQ(ComBlk_IRQn);
-    
+
     /*--------------------------------------------------------------------------
      * Abort current command if any.
      */
     abort_current_cmd();
-    
+
     /*--------------------------------------------------------------------------
      * Initialize COMBLK driver state variables.
      */
@@ -170,30 +173,30 @@ void MSS_COMBLK_send_cmd_with_ptr
     g_comblk_response_idx = 0u;
     g_comblk_page_handler = 0u;
     g_comblk_completion_handler = completion_handler;
-    
+
     /*--------------------------------------------------------------------------
      * Send command opcode as a single byte write to the Tx FIFO.
      */
     send_cmd_opcode(g_comblk_cmd_opcode);
-    
+
     /*--------------------------------------------------------------------------
      * Send the command parameters pointer to the Tx FIFO as a single 4 bytes
      * write to the Tx FIFO.
      */
     COMBLK->CONTROL |= CR_SIZETX_MASK;
-    
+
     /* Wait for space to become available in Tx FIFO. */
     do {
         tx_okay = COMBLK->STATUS & TXTOKAY_MASK;
     } while(0u == tx_okay);
-    
+
     /* Send command opcode. */
     COMBLK->DATA32 = cmd_params_ptr;
-    
+
     COMBLK->CONTROL &= ~CR_SIZETX_MASK;
-    
+
     g_comblk_state = COMBLK_WAIT_RESPONSE;
-    
+
     /*--------------------------------------------------------------------------
      * Enable interrupt.
      */
@@ -216,21 +219,21 @@ void MSS_COMBLK_send_cmd
 )
 {
     uint32_t size_sent;
-    
+
     ASSERT(cmd_size > 0);
-    
+
     /*
      * Disable and clear previous interrupts.
      */
     NVIC_DisableIRQ(ComBlk_IRQn);
     COMBLK->INT_ENABLE = 0u;
     NVIC_ClearPendingIRQ(ComBlk_IRQn);
-    
+
     /*
      * Abort current command if any.
      */
     abort_current_cmd();
-    
+
     /*
      * Initialize COMBLK driver state variables:
      */
@@ -245,7 +248,7 @@ void MSS_COMBLK_send_cmd
     g_comblk_response_idx = 0u;
     g_comblk_page_handler = 0u;
     g_comblk_completion_handler = completion_handler;
-    
+
     COMBLK->INT_ENABLE |= RCVOKAY_MASK;
 
     /*
@@ -258,7 +261,7 @@ void MSS_COMBLK_send_cmd
     {
         g_comblk_cmd_size = g_comblk_cmd_size - (uint16_t)size_sent;
         g_comblk_p_cmd = &g_comblk_p_cmd[size_sent];
-        
+
         g_comblk_state = COMBLK_TX_CMD;
     }
     else
@@ -295,21 +298,21 @@ void MSS_COMBLK_send_paged_cmd
 {
     uint32_t size_sent;
     uint8_t irq_enable = 0u;
-    
+
     ASSERT(cmd_size > 0u);
-    
+
     /*
      * Disable and clear previous interrupts.
      */
     NVIC_DisableIRQ(ComBlk_IRQn);
     COMBLK->INT_ENABLE = 0u;
     NVIC_ClearPendingIRQ(ComBlk_IRQn);
-    
+
     /*
      * Abort current command if any.
      */
     abort_current_cmd();
-    
+
     /*
      * Initialize COMBLK driver state variables:
      */
@@ -324,18 +327,20 @@ void MSS_COMBLK_send_paged_cmd
     g_comblk_response_idx = 0u;
     g_comblk_page_handler = page_read_handler;
     g_comblk_completion_handler = completion_handler;
-    
+
     /*
      * Fill FIFO with command.
      */
     send_cmd_opcode(g_comblk_cmd_opcode);
     size_sent = fill_tx_fifo(&p_cmd[1], cmd_size - 1u);
     ++size_sent;    /* Adjust for opcode byte sent. */
+
+
     if(size_sent < cmd_size)
     {
         g_comblk_cmd_size = g_comblk_cmd_size - (uint16_t)size_sent;
         g_comblk_p_cmd = &g_comblk_p_cmd[size_sent];
-        
+
         g_comblk_state = COMBLK_TX_CMD;
         irq_enable = TXTOKAY_MASK | RCVOKAY_MASK;
     }
@@ -350,7 +355,15 @@ void MSS_COMBLK_send_paged_cmd
      * Enable interrupt.
      */
     COMBLK->INT_ENABLE |= irq_enable;
-    NVIC_EnableIRQ(ComBlk_IRQn);
+// LED will toggle here
+   volatile uint64_t n = 50000;
+
+   while (n) {
+        --n;
+      }
+
+   NVIC_EnableIRQ(ComBlk_IRQn);
+// Never get LED to toggle after IRQ is enabled
 }
 
 /*==============================================================================
@@ -361,19 +374,21 @@ void ComBlk_IRQHandler(void)
     uint8_t status;
     uint8_t tx_okay;
     uint8_t rcv_okay;
-    
+
+MSS_GPIO_set_outputs(0);
+
     status = (uint8_t)COMBLK->STATUS;
-    
+
     /* Mask off interrupt that are not enabled.*/
     status &= COMBLK->INT_ENABLE;
-    
+
     rcv_okay = status & RCVOKAY_MASK;
-    
+
     if(rcv_okay)
     {
         handle_rx_okay_irq();
     }
-        
+
     tx_okay = status & TXTOKAY_MASK;
     if(tx_okay)
     {
@@ -425,7 +440,7 @@ static void handle_tx_okay_irq(void)
                 abort_current_cmd();
             }
         break;
-            
+
         case COMBLK_TX_DATA:
             if(g_comblk_data_size > 0u)
             {
@@ -452,7 +467,7 @@ static void handle_tx_okay_irq(void)
                 abort_current_cmd();
             }
         break;
-           
+
         case COMBLK_TX_PAGED_DATA:
             /*
              * Read a page of data if required.
@@ -474,7 +489,7 @@ static void handle_tx_okay_irq(void)
                     abort_current_cmd();
                 }
             }
-            
+
             /*
              * Transmit the page data or move to COMBLK_WAIT_RESPONSE state if
              * no further page data could be obtained by the call to the page
@@ -493,7 +508,7 @@ static void handle_tx_okay_irq(void)
                 g_comblk_p_data = &g_comblk_p_data[size_sent];
             }
         break;
-            
+
         /*----------------------------------------------------------------------
          * The TX_OKAY interrupt should NOT be enabled for states COMBLK_IDLE,
          * COMBLK_WAIT_RESPONSE and COMBLK_RX_RESPONSE.
@@ -520,11 +535,11 @@ static void handle_rx_okay_irq(void)
     uint16_t data16;
     uint16_t is_command;
     uint8_t data8;
-    
+
     data16 = (uint16_t)COMBLK->DATA8;
     is_command = data16 & DATA8_COMMAND_MASK;
     data8 = (uint8_t)data16;
-            
+
     switch(g_comblk_state)
     {
         /*----------------------------------------------------------------------
@@ -542,19 +557,19 @@ static void handle_rx_okay_irq(void)
                     process_sys_ctrl_command(rxed_opcode);
                 }
                 else
-                {  
+                {
                     g_comblk_response_idx = 0;
                     g_comblk_p_response[g_comblk_response_idx] = data8;
                     g_comblk_response_idx++;
-                    g_comblk_p_response[g_comblk_response_idx] = 0x00u;                
+                    g_comblk_p_response[g_comblk_response_idx] = 0x00u;
                     g_comblk_state = COMBLK_RX_RESPONSE;
                 }
             }
         break;
-       
+
         /*----------------------------------------------------------------------
          * The RCV_OKAY interrupt should only be enabled for states
-         * COMBLK_WAIT_RESPONSE and COMBLK_RX_RESPONSE. 
+         * COMBLK_WAIT_RESPONSE and COMBLK_RX_RESPONSE.
          */
         case COMBLK_WAIT_RESPONSE:
             if(is_command)
@@ -574,7 +589,7 @@ static void handle_rx_okay_irq(void)
                 }
             }
         break;
-            
+
         case COMBLK_RX_RESPONSE:
             if(is_command)
             {
@@ -595,12 +610,12 @@ static void handle_rx_okay_irq(void)
                     if(g_comblk_response_idx < g_comblk_response_size)
                     {
                         uint8_t rxed_data;
-                        
+
                         rxed_data = data8;
                         g_comblk_p_response[g_comblk_response_idx] = rxed_data;
                         ++g_comblk_response_idx;
                     }
-                    
+
                     if(g_comblk_response_idx == g_comblk_response_size)
                     {
                         complete_request(g_comblk_response_idx);
@@ -609,7 +624,7 @@ static void handle_rx_okay_irq(void)
                 }
             }
         break;
-            
+
         /*----------------------------------------------------------------------
          * The RCV_OKAY interrupt should NOT be enabled for states
          * COMBLK_IDLE, COMBLK_TX_CMD and COMBLK_TX_DATA.
@@ -629,7 +644,7 @@ static void handle_rx_okay_irq(void)
                 process_sys_ctrl_command(rxed_opcode);
             }
         break;
-        
+
         case COMBLK_TX_CMD:
             /* Fall through */
         case COMBLK_TX_DATA:
@@ -641,7 +656,7 @@ static void handle_rx_okay_irq(void)
                 process_sys_ctrl_command(rxed_opcode);
             }
         break;
-        
+
         default:
             complete_request(0u);
             g_comblk_state = COMBLK_IDLE;
@@ -673,13 +688,13 @@ static void abort_current_cmd(void)
     if(g_request_in_progress)
     {
         uint32_t flush_in_progress;
-        
+
         /*
          * Call completion handler just in case we are in a multi threaded system
          * to avoid a task lockup.
          */
         complete_request(g_comblk_response_idx);
-        
+
         /*
          * Flush the FIFOs
          */
@@ -699,15 +714,15 @@ static void send_cmd_opcode
 )
 {
     uint32_t tx_okay;
-    
+
     /* Set transmit FIFO to transfer bytes. */
     COMBLK->CONTROL &= ~CR_SIZETX_MASK;
-    
+
     /* Wait for space to become available in Tx FIFO. */
     do {
         tx_okay = COMBLK->STATUS & TXTOKAY_MASK;
     } while(0u == tx_okay);
-    
+
     /* Send command opcode. */
     COMBLK->FRAME_START8 = opcode;
 }
@@ -726,7 +741,7 @@ static uint32_t fill_tx_fifo
 
     /* Set transmit FIFO to transfer bytes. */
     COMBLK->CONTROL &= ~CR_SIZETX_MASK;
-    
+
     size_sent = 0u;
     tx_okay = COMBLK->STATUS & TXTOKAY_MASK;
     while((tx_okay != 0u) && (size_sent < cmd_size))
@@ -735,7 +750,7 @@ static uint32_t fill_tx_fifo
         ++size_sent;
         tx_okay = COMBLK->STATUS & TXTOKAY_MASK;
     }
-    
+
     return size_sent;
 }
 

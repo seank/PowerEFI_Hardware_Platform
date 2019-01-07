@@ -10,9 +10,9 @@
  *
  * V2.4 Added reqpktcount to handle the reqpkt bit. This resolves NAKTIMEOUT error
  *  issue found with some of pen drives
- * V2.4 Naming convention change, other cosmetic changes.   
+ * V2.4 Naming convention change, other cosmetic changes.
  * V2.4 DMA handling independent of device mode
- * V2.4 Added endpoint abort functionality. 
+ * V2.4 Added endpoint abort functionality.
  * V2.3 Added Add SetAddrDelay 2ms fix
  * V2.3 Host performance improvement changes
  *
@@ -28,7 +28,7 @@
 #include "mss_usb_host_reg_io.h"
 #include <string.h>
 #include <stdio.h>
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 
 #ifdef __cplusplus
 extern "C" {

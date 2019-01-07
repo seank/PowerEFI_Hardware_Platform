@@ -23,7 +23,7 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -15,7 +15,7 @@
 #ifndef __MSS_USB_COMMON_CIF_H_
 #define __MSS_USB_COMMON_CIF_H_
 
-#include "../../CMSIS/m2sxxx.h"
+#include "CMSIS/m2sxxx.h"
 #include "mss_usb_config.h"
 #include "mss_usb_core_regs.h"
 

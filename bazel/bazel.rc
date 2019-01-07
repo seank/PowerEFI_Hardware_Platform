@@ -1,0 +1,6 @@
+# Build for Cortex-M3 by default and execute workspace_status.sh
+build --crosstool_top=//toolchain:toolchain \
+  --host_crosstool_top=@bazel_tools//tools/cpp:toolchain --cpu=cortex-m3 \
+  --incompatible_remove_native_http_archive=false \
+  --stamp \
+  --workspace_status_command=./bazel/workspace_status.sh

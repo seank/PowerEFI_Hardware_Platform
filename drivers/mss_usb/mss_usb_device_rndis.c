@@ -8,7 +8,7 @@
  * USBD-RNDIS class driver implementation:
  * This file implements RNDIS class Functionality. The RNDIS protocol level
  * handling is it the next level up.
- * 
+ *
  *
  * SVN $Revision: 8207 $
  * SVN $Date: 2016-01-06 14:42:19 +0530 (Wed, 06 Jan 2016) $
@@ -17,7 +17,7 @@
 #include "mss_usb_device_rndis.h"
 #include "mss_usb_device.h"
 #include "mss_usb_std_def.h"
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -10,14 +10,14 @@
  * BoT with Transparent SCSI command set is implemented.
  *
  * V2.4 Naming convention change, other cosmetic changes.
- * 
+ *
  * SVN $Revision: 7515 $
  * SVN $Date: 2015-07-02 14:47:49 +0530 (Thu, 02 Jul 2015) $
  */
 #include "mss_usb_device_msd.h"
 #include "mss_usb_device.h"
 #include "mss_usb_std_def.h"
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -1792,7 +1792,7 @@ static uint8_t usbd_msc_process_read_capacity_10(void)
     g_xfr_buf_ptr = (uint8_t*)0;
     g_xfr_buf_len = 0u;
     g_req_type = SCSI_IN;
-    
+
     /*Data Direction must be D2H (IN)*/
     if(!(g_bot_cbw.flags & 0x80u))
     {

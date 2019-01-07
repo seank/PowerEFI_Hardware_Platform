@@ -11,14 +11,14 @@
  * class functionality.
  *
  * V2.4 Naming convention change, other cosmetic changes.
- * 
+ *
  * SVN $Revision: 7515 $
  * SVN $Date: 2015-07-02 14:47:49 +0530 (Thu, 02 Jul 2015) $
  */
 #include "mss_usb_device_vendor.h"
 #include "mss_usb_device.h"
 #include "mss_usb_std_def.h"
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 
 #ifdef __cplusplus
 extern "C" {

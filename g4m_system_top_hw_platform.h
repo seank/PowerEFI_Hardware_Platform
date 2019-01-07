@@ -9,7 +9,7 @@
 
 /*-----------------------------------------------------------------------------
 * CM3 subsystem memory map
-* Master(s) for this subsystem: CM3 FABRIC2MSSFIC2 
+* Master(s) for this subsystem: CM3 FABRIC2MSSFIC2
 *---------------------------------------------------------------------------*/
 #define G4M_SYSTEM_MSS_0                0x40020800U
 

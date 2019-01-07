@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * (c) Copyright 2008-2015 Microsemi SoC Products Group.  All rights reserved.
- * 
+ *
  * SmartFusion2 microcontroller subsystem SPI bare metal software driver public
  * API.
  *
@@ -18,7 +18,7 @@
   adapted for use as part of an operating system, but the implementation of the
   adaptation layer between this driver and the operating system's driver model
   is outside the scope of this driver.
-    
+
   @section hw_dependencies Hardware Flow Dependencies
   The configuration of all features of the MSS SPI peripherals is covered by
   this driver with the exception of the SmartFusion2 IOMUX configuration.
@@ -27,18 +27,18 @@
   assigning external pins for use by either the microcontroller subsystem or the
   FPGA fabric. The MSS SPI serial signals are routed through IOMUXs to the
   SmartFusion2 device external pins. The MSS SPI serial signals may also be
-  routed through IOMUXs to the SmartFusion2 FPGA fabric. 
+  routed through IOMUXs to the SmartFusion2 FPGA fabric.
   The IOMUXs are configured using the SmartFusion2 MSS configurator tool. You
   must ensure that the MSS SPI peripherals are enabled and configured in the
   SmartFusion2 MSS configurator if you wish to use them. For more information on
   IOMUXs, refer to the IOMUX section of the SmartFusion2 Microcontroller
-  Subsystem (MSS) User’s Guide.
+  Subsystem (MSS) Userï¿½s Guide.
   The base address, register addresses and interrupt number assignment for the
   MSS SPI peripherals are defined as constants in the SmartFusion2 CMSIS HAL.
   You must ensure that the latest SmartFusion2 CMSIS HAL is included in the
   project settings of the software tool chain used to build your project and
   that it is generated into your project.
-  
+
   @section theory_op Theory of Operation
   The MSS SPI driver functions are grouped into the following categories:
     - Initialization
@@ -53,10 +53,10 @@
   read the result of an ADC conversion from a SPI analog to digital converter.
   Block transfers allow the MSS SPI to write or read a number of bytes in a SPI
   transaction. Block transfer transactions allow data transfers in multiples of
-  8 bits (8, 16, 24, 32, 40…). Block transfers are typically used with byte
+  8 bits (8, 16, 24, 32, 40ï¿½). Block transfers are typically used with byte
   oriented devices like SPI FLASH devices.
-  
-  Initialization 
+
+  Initialization
   The MSS SPI driver is initialized through a call to the MSS_SPI_init()
   function. The MSS_SPI_init() function takes only one parameter, a pointer to
   one of two global data structures used by the driver to store state
@@ -70,17 +70,17 @@
   clears any pending interrupts from that MSS SPI in the Cortex-M3 NVIC.
   The MSS_SPI_init() function must be called before any other MSS SPI driver
   functions can be called.
-  
+
   Configuration
   An MSS SPI block can operate either as a master or slave SPI device. There are
   two distinct functions for configuring a MSS SPI block for master or slave
   operations.
-  
+
   Master configuration
   The MSS_SPI_configure_master_mode() function configures the specified MSS SPI
   block for operations as a SPI master. It must be called once for each remote
   SPI slave device which the MSS SPI block will communicate with. It is used to
-  provide the following information about each SPI slave’s communication
+  provide the following information about each SPI slaveï¿½s communication
   characteristics:
     - The SPI protocol mode
     - The SPI clock speed
@@ -92,18 +92,18 @@
   will be used to sample the data signal (Motorola SPI modes), or it defines
   whether the SPI block will operate in Texas Instruments (TI) synchronous
   serial mode or in National Semiconductor (NSC) MICROWIRE mode.
-  
+
   Slave configuration
   The MSS_SPI_configure_slave_mode() function configures the specified MSS SPI
   block for operations as a SPI slave. It configures the following SPI
   communication characteristics:
-    - The SPI protocol mode 
+    - The SPI protocol mode
     - The frame bit length
   The SPI protocol mode defines the initial state of the clock signal at the
   start of a transaction and which clock edge will be used to sample the data
   signal (Motorola SPI modes), or it defines whether the SPI block will operate
   in TI synchronous serial mode or in NSC MICROWIRE mode.
-  
+
   SPI master frame transfer control
   The following functions are used as part of SPI master frame transfers:
     - MSS_SPI_set_slave_select()
@@ -118,7 +118,7 @@
   complete to prevent this slave select line from being asserted during
   subsequent SPI transactions. A call to this function is only required if the
   master is communicating with multiple slave devices.
-  
+
   SPI master block transfer control
   The following functions are used as part of SPI master block transfers:
     - MSS_SPI_set_slave_select()
@@ -144,7 +144,7 @@
   Note: Unlike in previous versions of this driver, the SPS bit is set in the
         CONTROL register in Motorola modes so that the Slave Select line remains
         asserted throughout block transfers.
- 
+
   SPI slave frame transfer control
   The following functions are used as part of SPI slave frame transfers:
     - MSS_SPI_set_slave_tx_frame()
@@ -190,7 +190,7 @@
   specified through the call to MSS_SPI_set_slave_block_buffers() would also
   typically include one or more bytes allowing for the turnaround time required
   for the command handler function to execute and call MSS_SPI_set_cmd_response().
-  
+
   DMA block transfer control
   The following functions are used as part of MSS SPI DMA transfers:
     - MSS_SPI_disable()
@@ -208,22 +208,22 @@
   configuration. A SPI write transfer occurs when the DMA channel is configured
   to write data to the MSS SPI block. A SPI read transfer occurs when the DMA
   channel is configured to read data from the MSS SPI block.
-  
+
  *//*=========================================================================*/
 #ifndef MSS_SPI_H_
 #define MSS_SPI_H_
 
-#include "../../CMSIS/m2sxxx.h"
+#include "CMSIS/m2sxxx.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /***************************************************************************//**
   This defines the function prototype that must be followed by MSS SPI slave
   frame receive handler functions. These functions are registered with the MSS
   SPI driver through the MSS_SPI_set_frame_rx_handler () function.
-  
+
   Declaring and Implementing Slave Frame Receive Handler Functions:
     Slave frame receive handler functions should follow the following prototype:
         void slave_frame_receive_handler ( uint32_t rx_frame );
@@ -237,7 +237,7 @@ typedef void (*mss_spi_frame_rx_handler_t)( uint32_t rx_frame );
   This defines the function prototype that must be followed by MSS SPI slave
   block receive handler functions. These functions are registered with the MSS
   SPI driver through the MSS_SPI_set_slave_block_buffers() function.
-  
+
   Declaring and Implementing Slave Block Receive Handler Functions
     Slave block receive handler functions should follow the following prototype:
         void mss_spi_block_rx_handler ( uint8_t * rx_buff, uint16_t rx_size );
@@ -254,26 +254,26 @@ typedef void (*mss_spi_block_rx_handler_t)( uint8_t * rx_buff, uint32_t rx_size 
   bits which select the different modes of operation for the MSS SPI. It is used
   as a parameter to the MSS_SPI_configure_master_mode() and
   MSS_SPI_configure_slave_mode() functions.
-  
+
   - MSS_SPI_MODE0:
         Clock starts low, data read on clock's rising edge, data changes on
         falling edge.
-        
+
   - MSS_SPI_MODE1:
         Clock starts low, data read on clock's falling edge, data changes on
         rising edge.
-        
+
   - MSS_SPI_MODE2:
         Clock starts high, data read on clock's falling edge, data changes on
         rising edge.
-        
+
   - MSS_SPI_MODE3:
         Clock starts high, data read on clock's rising edge, data changes on
         falling edge.
-        
-  - MSS_TI_MODE:  
+
+  - MSS_TI_MODE:
         TI synchronous serial mode. Slave select is pulsed at start of transfer.
-        
+
   - MSS_NSC_MODE:
         NSC Microwire mode.
  */
@@ -351,12 +351,12 @@ typedef struct __mss_spi_instance_t
     /* CMSIS related defines identifying the SPI hardware. */
     SPI_TypeDef *           hw_reg;     /*!< Pointer to SPI registers. */
     IRQn_Type               irqn;       /*!< SPI's Cortex-M3 NVIC interrupt number. */
-    
+
     /* Internal transmit state: */
     const uint8_t * slave_tx_buffer;    /*!< Pointer to slave transmit buffer. */
     uint32_t slave_tx_size;             /*!< Size of slave transmit buffer. */
     uint32_t slave_tx_idx;              /*!< Current index into slave transmit buffer. */
-    
+
     /* Slave command response buffer: */
     const uint8_t * resp_tx_buffer;
     uint32_t resp_buff_size;
@@ -364,20 +364,20 @@ typedef struct __mss_spi_instance_t
     mss_spi_block_rx_handler_t cmd_handler;
     uint32_t cmd_done;                  /*!< Flag which indicates response has been set up and
                                              it is safe to pad with 0s once the response is sent. */
-    
+
     /* Internal receive state: */
     uint8_t * slave_rx_buffer;          /*!< Pointer to buffer where data received by a slave will be stored. */
     uint32_t slave_rx_size;             /*!< Slave receive buffer siSze. */
     uint32_t slave_rx_idx;              /*!< Current index into slave receive buffer. */
-    
+
     /* Configuration for each target slave. */
     mss_spi_slave_cfg_t slaves_cfg[MSS_SPI_MAX_NB_OF_SLAVES];
-    
+
     /* Slave received frame handler: */
     mss_spi_frame_rx_handler_t frame_rx_handler;    /*!< Pointer to function that will be called when a frame is received when the SPI block is configured as slave. */
-    
+
     uint32_t slave_tx_frame;                        /*!< Value of the data frame that will be transmitted when the SPI block is configured as slave. */
-    
+
     /* Slave block rx handler: */
     mss_spi_block_rx_handler_t block_rx_handler;    /*!< Pointer to the function that will be called when a data block has been received. */
 
@@ -406,14 +406,14 @@ extern mss_spi_instance_t g_mss_spi1;
   The MSS_SPI_init() function initializes and hardware and data structures of
   one of the MSS SPIs. The MSS_SPI_init() function must be called before any
   other MSS SPI driver functions can be called.
-  
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to be initialized. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-    
+
   Example:
   @code
   MSS_SPI_init( &g_mss_spi0 );
@@ -429,14 +429,14 @@ void MSS_SPI_init
   operations as a slave SPI device. It configures the SPI hardware with the
   selected SPI protocol mode and frame size for communication with a specific
   SPI master.
-    
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to be configured. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-    
+
   @param protocol_mode
     This parameter is used to specify the SPI operating mode. Allowed values are:
         - MSS_SPI_MODE0
@@ -445,14 +445,14 @@ void MSS_SPI_init
         - MSS_SPI_MODE3
         - MSS_TI_MODE
         - MSS_NSC_MODE
- 
+
   @param frame_bit_length
     Number of bits making up the frame. The maximum frame length is 24 bits in
     NSC Microwire mode and 32 bits for other modes. You must use the
     MSS_SPI_BLOCK_TRANSFER_FRAME_SIZE constant as the value for frame_bit_length
     when configuring the MSS SPI master for block transfer transactions with the
     target SPI slave.
-  
+
   Example:
   @code
   MSS_SPI_init( &g_mss_spi0 );
@@ -463,8 +463,8 @@ void MSS_SPI_init
         MSS_SPI_BLOCK_TRANSFER_FRAME_SIZE
     );
   @endcode
-  
- */ 
+
+ */
 void MSS_SPI_configure_slave_mode
 (
     mss_spi_instance_t * this_spi,
@@ -476,52 +476,52 @@ void MSS_SPI_configure_slave_mode
   The MSS_SPI_configure_master_mode() function configures the protocol mode,
   serial clock speed and frame size for a specific target SPI slave device. It
   is used when the MSS SPI hardware block is used as a SPI master. This function
-  must be called once for each target SPI slave which the MSS SPI master is 
-  wishes to communicate with. The SPI master hardware will be configured with 
+  must be called once for each target SPI slave which the MSS SPI master is
+  wishes to communicate with. The SPI master hardware will be configured with
   the configuration specified by this function during calls to
   MSS_SPI_set_slave_select().
-  
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to be configured. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-    
+
   @param slave
     The slave parameter is used to identify a target SPI slave. The driver will
     hold the MSS SPI master configuration required to communicate with this
     slave, as specified by the other function parameters. Allowed values are:
-        • MSS_SPI_SLAVE_0
-        • MSS_SPI_SLAVE_1
-        • MSS_SPI_SLAVE_2
-        • MSS_SPI_SLAVE_3
-        • MSS_SPI_SLAVE_4
-        • MSS_SPI_SLAVE_5
-        • MSS_SPI_SLAVE_6
-        • MSS_SPI_SLAVE_7
-    
+        ï¿½ MSS_SPI_SLAVE_0
+        ï¿½ MSS_SPI_SLAVE_1
+        ï¿½ MSS_SPI_SLAVE_2
+        ï¿½ MSS_SPI_SLAVE_3
+        ï¿½ MSS_SPI_SLAVE_4
+        ï¿½ MSS_SPI_SLAVE_5
+        ï¿½ MSS_SPI_SLAVE_6
+        ï¿½ MSS_SPI_SLAVE_7
+
   @param protocol_mode
     This parameter is used to specify the SPI operating mode. Allowed values are:
-        • MSS_SPI_MODE0
-        • MSS_SPI_MODE1
-        • MSS_SPI_MODE2
-        • MSS_SPI_MODE3
-        • MSS_SPI_TI_MODE
-        • MSS_SPI_NSC_MODE
- 
+        ï¿½ MSS_SPI_MODE0
+        ï¿½ MSS_SPI_MODE1
+        ï¿½ MSS_SPI_MODE2
+        ï¿½ MSS_SPI_MODE3
+        ï¿½ MSS_SPI_TI_MODE
+        ï¿½ MSS_SPI_NSC_MODE
+
   @param clk_div
     SPI clock divider value used to generate serial interface clock signal from
     PCLK. Allowed values are even numbers in the range from 2 to 512. The PCLK
     frequency is divided by the specified value to give the serial interface
     clock frequency.
-        
+
   @param frame_bit_length
     Number of bits making up the frame. The maximum frame length is 32 bits. You
     must use the MSS_SPI_BLOCK_TRANSFER_FRAME_SIZE constant as the value for
     frame_bit_length when configuring the MSS SPI master for block transfer
     transactions with the target SPI slave.
-    
+
   Example:
   @code
   MSS_SPI_init( &g_mss_spi0 );
@@ -552,7 +552,7 @@ void MSS_SPI_configure_slave_mode
   MSS_SPI_transfer_frame(&g_mss_spi0, 0x55);
   MSS_SPI_clear_slave_select(&g_mss_spi0, MSS_SPI_SLAVE_1);
   @endcode
- */ 
+ */
 void MSS_SPI_configure_master_mode
 (
     mss_spi_instance_t *    this_spi,
@@ -573,18 +573,18 @@ void MSS_SPI_configure_master_mode
   configures the MSS SPI master with the configuration settings necessary for
   communication with the specified slave. These configuration settings must be
   specified in a previous call to the MSS_SPI_configure_master_mode() function.
- 
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-    
+
   @param slave
     The slave parameter is one of the mss_spi_slave_t enumerated constants
     identifying the slave.
-  
+
   Example:
   @code
   const uint8_t frame_size = 25;
@@ -615,19 +615,19 @@ void MSS_SPI_set_slave_select
   The MSS_SPI_clear_slave_select() function is used by a MSS SPI Master to
   deselect a specific slave. This function causes the relevant slave select
   signal to be de-asserted.
- 
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-    
- 
+
+
   @param slave
     The slave parameter is one of mss_spi_slave_t enumerated constants
     identifying a slave.
-  
+
   Example:
   @code
   const uint8_t frame_size = 25;
@@ -659,21 +659,21 @@ void MSS_SPI_clear_slave_select
   SPI_set_transfer_byte_count() function to setup a DMA controlled SPI transmit
   transaction as the SPI_set_transfer_byte_count() function must only be used
   when the MSS SPI hardware is disabled.
- 
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-  
+
   Example:
   @code
   uint32_t transfer_size;
   uint8_t tx_buffer[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-  
+
   transfer_size = sizeof(tx_buffer);
-  
+
   MSS_SPI_disable( &g_mss_spi0 );
   MSS_SPI_set_transfer_byte_count( &g_mss_spi0, transfer_size );
   PDMA_start
@@ -684,7 +684,7 @@ void MSS_SPI_clear_slave_select
         transfer_size
     );
   MSS_SPI_enable( &g_mss_spi0 );
-  
+
   while ( !MSS_SPI_tx_done( &g_mss_spi0 ) )
   {
       ;
@@ -699,21 +699,21 @@ void MSS_SPI_disable
 /***************************************************************************//**
   The MSS_SPI_enable() function is used to re-enable a MSS SPI hardware block
   after it was disabled using the SPI_disable() function.
- 
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-    
+
   Example:
   @code
   uint32_t transfer_size;
   uint8_t tx_buffer[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-  
+
   transfer_size = sizeof(tx_buffer);
-  
+
   MSS_SPI_disable( &g_mss_spi0 );
   MSS_SPI_set_transfer_byte_count( &g_mss_spi0, transfer_size );
   PDMA_start
@@ -724,7 +724,7 @@ void MSS_SPI_disable
         transfer_size
     );
   MSS_SPI_enable( &g_mss_spi0 );
-  
+
   while ( !MSS_SPI_tx_done( &g_mss_spi0 ) )
   {
       ;
@@ -740,37 +740,37 @@ void MSS_SPI_enable
   The MSS_SPI_set_transfer_byte_count() function is used as part of setting up
   a SPI transfer using DMA. It specifies the number of bytes that must be
   transferred before MSS_SPI_tx_done() indicates that the transfer is complete.
- 
+
   As well as setting the frame count, this function also sets the frame size
   to 8 bits.
- 
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-    
+
   @param byte_count
     The byte_count parameter specifies the number of bytes that must be
     transferred by the SPI hardware block before MSS_SPI_tx_done() indicates
     that the transfer is complete.
-  
+
   Example:
   @code
   uint32_t transfer_size;
   uint8_t tx_buffer[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-  
+
   transfer_size = sizeof(tx_buffer);
-  
+
   MSS_SPI_disable( &g_mss_spi0 );
-  
+
   MSS_SPI_set_transfer_byte_count( &g_mss_spi0, transfer_size );
-  
+
   PDMA_start( PDMA_CHANNEL_0, (uint32_t)tx_buffer, PDMA_SPI0_TX_REGISTER, transfer_size );
-  
+
   MSS_SPI_enable( &g_mss_spi0 );
-  
+
   while ( !MSS_SPI_tx_done( &g_mss_spi0) )
   {
       ;
@@ -786,25 +786,25 @@ void MSS_SPI_set_transfer_byte_count
 /***************************************************************************//**
   The MSS_SPI_tx_done() function is used to find out if a DMA controlled transfer
   has completed.
- 
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-  
+
   Example:
   @code
       uint32_t transfer_size;
       uint8_t tx_buffer[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-      
+
       transfer_size = sizeof(tx_buffer);
-      
+
       MSS_SPI_disable( &g_mss_spi0 );
-      
+
       MSS_SPI_set_transfer_byte_count( &g_mss_spi0, transfer_size );
-      
+
       PDMA_start
         (
             PDMA_CHANNEL_0,
@@ -812,9 +812,9 @@ void MSS_SPI_set_transfer_byte_count
             PDMA_SPI1_TX_REGISTER,
             transfer_size
         );
-      
+
       MSS_SPI_enable( &g_mss_spi0 );
-      
+
       while ( !MSS_SPI_tx_done(&g_mss_spi0) )
       {
           ;
@@ -833,15 +833,15 @@ uint32_t MSS_SPI_tx_done
   not divisible by 8.
 
   Note: The maximum frame size in NSC Microwire mode is 24 bits organized as an
-        8 bit command followed by up to 16 bits of data .  
+        8 bit command followed by up to 16 bits of data .
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-    
- 
+
+
   @param tx_bits
     The tx_bits parameter is a 32 bits word containing the data that will be
     transmitted.
@@ -852,13 +852,13 @@ uint32_t MSS_SPI_tx_done
   @return
     This function returns a 32 bits word containing the value that is received
     from the slave.
- 
+
   Example:
   @code
       const uint8_t frame_size = 25;
       const uint32_t master_tx_frame = 0x0100A0E1;
       uint32_t master_rx;
-      
+
       MSS_SPI_init( &g_mss_spi0 );
       MSS_SPI_configure_master_mode
         (
@@ -868,7 +868,7 @@ uint32_t MSS_SPI_tx_done
             256u,
             frame_size
          );
-     
+
       MSS_SPI_set_slave_select( &g_mss_spi0, MSS_SPI_SLAVE_0 );
       master_rx = MSS_SPI_transfer_frame( &g_mss_spi0, master_tx_frame );
       MSS_SPI_clear_slave_select( &g_mss_spi0, MSS_SPI_SLAVE_0 );
@@ -890,44 +890,44 @@ uint32_t MSS_SPI_transfer_frame
       command in a single SPI transaction. This function can be used alongside
       Peripheral DMA functions to perform the actual moving to and from the SPI
       hardware block using Peripheral DMA.
- 
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
- 
+
   @param cmd_buffer
     The cmd_buffer parameter is a pointer to the buffer containing the data that
     will be sent by the master from the beginning of the transfer. This pointer
     can be null (0) if the master does not need to send a command before reading
     data or if the command part of the transfer is written to the SPI hardware
     block using DMA.
- 
+
   @param cmd_byte_size
     The cmd_byte_size parameter specifies the number of bytes contained in
     cmd_buffer that will be sent. A value of 0 indicates that no data needs to
     be sent to the slave. A non-zero value while the cmd_buffer pointer is 0 is
     used to indicate that the command data will be written to the SPI hardware
     block using DMA.
- 
+
   @param rd_buffer
     The rd_buffer parameter is a pointer to the buffer where the data received
     from the slave after the command has been sent will be stored.
- 
+
   @param rd_byte_size
     The rd_byte_size parameter specifies the number of bytes to be received from
     the slave and stored in the rd_buffer. A value of 0 indicates that no data
     is to be read from the slave. A non-zero value while the rd_buffer pointer
     is null (0) is used to specify the receive size when using DMA to read from
-    the slave. 
+    the slave.
     Note:   When using DMA, all bytes received from the slave, including the
             bytes received while the command is sent, will be read through DMA.
-  
+
   Polled write transfer example:
   @code
-      uint8_t master_tx_buffer[MASTER_TX_BUFFER] = 
+      uint8_t master_tx_buffer[MASTER_TX_BUFFER] =
       {
           0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A
       };
@@ -940,7 +940,7 @@ uint32_t MSS_SPI_transfer_frame
             256u,
             MSS_SPI_BLOCK_TRANSFER_FRAME_SIZE
          );
-     
+
       MSS_SPI_set_slave_select( &g_mss_spi0, MSS_SPI_SLAVE_0 );
       MSS_SPI_transfer_block
         (
@@ -952,7 +952,7 @@ uint32_t MSS_SPI_transfer_frame
         );
       MSS_SPI_clear_slave_select( &g_mss_spi0, MSS_SPI_SLAVE_0 );
   @endcode
- 
+
   DMA transfer example:
   In this example the transmit and receive buffers are not specified as part of
   the call to MSS_SPI_transfer_block(). MSS_SPI_transfer_block() will only
@@ -961,13 +961,13 @@ uint32_t MSS_SPI_transfer_frame
   the content of the MSS SPI receive hardware FIFO. The transmit and receive
   buffers are specified by two separate calls to PDMA_start() to initiate DMA
   transfers on the channel used for transmit data and the channel used for
-  receive data. 
+  receive data.
   @code
       uint8_t master_tx_buffer[MASTER_RX_BUFFER] =
       {
           0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA
       };
-      uint8_t slave_rx_buffer[MASTER_RX_BUFFER] = 
+      uint8_t slave_rx_buffer[MASTER_RX_BUFFER] =
       {
           0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A
       };
@@ -989,14 +989,14 @@ uint32_t MSS_SPI_transfer_frame
             PDMA_SPI0_RX_REGISTER,
             (uint32_t)master_rx_buffer,
             sizeof(master_rx_buffer)
-        ); 
+        );
       PDMA_start
         (
             PDMA_CHANNEL_2,
             (uint32_t)master_tx_buffer,
             PDMA_SPI0_TX_REGISTER,
             sizeof(master_tx_buffer)
-        ); 
+        );
       while( PDMA_status(PDMA_CHANNEL_1) == 0 )
       {
           ;
@@ -1021,19 +1021,19 @@ void MSS_SPI_transfer_block
   The MSS_SPI_set_frame_rx_handler() function is used by MSS SPI slaves to
   specify the receive handler function that will be called by the MSS SPI driver
   interrupt handler when a a frame of data is received by the MSS SPI slave.
-  
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-    
- 
+
+
   @param rx_handler
     The rx_handler parameter is a pointer to the frame receive handler that must
     be called when a frame is received by the MSS SPI slave.
- 
+
   Example:
   @code
       uint32_t g_slave_rx_frame = 0;
@@ -1067,15 +1067,15 @@ void MSS_SPI_set_frame_rx_handler
   The MSS_SPI_set_slave_tx_frame() function is used by MSS SPI slaves to specify
   the frame that will be transmitted when a transaction is initiated by the SPI
   master.
-  
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
-    
- 
+
+
   @param frame_value
     The frame_value parameter contains the value of the frame to be sent to the
     master.
@@ -1113,7 +1113,7 @@ void MSS_SPI_set_slave_tx_frame
     - The buffer where data received from a master will be stored.
     - The handler function that must be called after the receive buffer has been
       filled.
-    - The maximum number of bytes that the slave will accept from the master 
+    - The maximum number of bytes that the slave will accept from the master
       (excess bytes are discarded).
   These parameters allow the following use cases:
     - Slave performing an action after receiving a block of data from a master
@@ -1129,50 +1129,50 @@ void MSS_SPI_set_slave_tx_frame
       functions MSS_SPI_set_cmd_handler() and MSS_SPI_set_cmd_response(). Please
       refer to the MSS_SPI_set_cmd_handler() function description for details of
       this use case.
-  
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block to operate on. There are two such
     data structures, g_mss_spi0 and g_mss_spi1, associated with MSS SPI 0 and
     MSS SPI 1 respectively. This parameter must point to either the g_mss_spi0
     or g_mss_spi1 global data structure defined within the SPI driver.
- 
+
   @param tx_buffer
     The tx_buffer parameter is a pointer to a buffer containing the data that
     will be sent to the master. This parameter can be set to 0 if the MSS SPI
     slave is not intended to be the target of SPI read.
- 
+
   @param tx_buff_size
     The tx_buff_size parameter specifies the number of bytes that will be
     transmitted by the SPI slave. It is the number of bytes contained in the
     tx_buffer. This parameter can be set to 0 if the MSS SPI slave is not
     intended to be the target of SPI read transactions.
- 
+
   @param rx_buffer
     The rx_buffer parameter is a pointer to the buffer where data received from
     the master will be stored. This parameter can be set to 0 if the MSS SPI
     slave is not intended to be the target of SPI write or write-read
     transactions.
- 
+
   @param rx_buff_size
     The rx_buff_size parameter specifies the size of the receive buffer. It is
     also the number of bytes that must be received before the receive handler
     is called, if a receive handler is specified using the block_rx_handler
     parameter. This parameter can be set to 0 if the MSS SPI slave is not
     intended to be the target of SPI write or write-read transactions.
- 
+
   @param block_rx_handler
     The block_rx_handler parameter is a pointer to a function that will be
     called when the receive buffer has been filled. This parameter can be set to
     0 if the MSS SPI slave is not intended to be the target of SPI write or
     write-read transactions.
- 
+
   Slave performing operation based on master command:
   In this example the SPI slave is configured to receive 10 bytes of data or
   command from the SPI master and process the data received.
   @code
      uint32_t nb_of_rx_handler_calls = 0;
-     
+
      void spi1_block_rx_handler_b
      (
          uint8_t * rx_buff,
@@ -1181,22 +1181,22 @@ void MSS_SPI_set_slave_tx_frame
      {
          ++nb_of_rx_handler_calls;
      }
-     
+
      void setup_slave( void )
      {
-         uint8_t slave_rx_buffer[10] = 
+         uint8_t slave_rx_buffer[10] =
          {
              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
          };
-         
+
          MSS_SPI_init( &g_mss_spi1 );
          MSS_SPI_configure_slave_mode
-            ( 
+            (
                 &g_mss_spi0,
                 MSS_SPI_MODE2,
                 MSS_SPI_BLOCK_TRANSFER_FRAME_SIZE
             );
-         
+
          MSS_SPI_set_slave_block_buffers
              (
                  &g_mss_spi1,
@@ -1208,7 +1208,7 @@ void MSS_SPI_set_slave_tx_frame
              );
      }
   @endcode
-  
+
   Slave responding to command example:
   In this example the slave will return data based on a two byte command sent by
   the master. The first part of the transaction involves the slave reading the
@@ -1216,14 +1216,14 @@ void MSS_SPI_set_slave_tx_frame
   the receive handler is called and the slave can process the command. The second
   part of the transaction, where the slave returns data based on the command value,
   is sent using a DMA transfer initiated from within the receive handler.
-  
+
   The MSS_SPI_set_slave_block_buffers() function specifies that two commands must
   be received from the master before the receive handler is called. A delay time
   must be defined in the application program to delay the master from initiating
   the second transfer to receive the response data from the MSS SPI slave until
   the receive handler has executed, determined the response data and set up the
   DMA transfer.
- 
+
   @code
     #define MASTER_NB_OF_COMMANDS   2
     #define SLAVE_RESPONSE_LENGTH   4
@@ -1245,7 +1245,7 @@ void MSS_SPI_set_slave_tx_frame
         channel = rx_buff[1];
 
         if(RESET_CHANNEL == cmd)
-        {    
+        {
             p_response = rst_chan( channel );
         }
         else if(CONVERT == cmd)
@@ -1307,7 +1307,7 @@ void MSS_SPI_set_slave_tx_frame
             spi1_rx_handler_d
         );
     }
- 
+
   @endcode
  */
 void MSS_SPI_set_slave_block_buffers
@@ -1356,7 +1356,7 @@ void MSS_SPI_set_slave_block_buffers
                 |
                 --> cmd_handler() called here.
                          |
-                         |                          
+                         |
                          --> MSS_SPI_set_cmd_response() called here by
                              implementation of cmd_handler() to set the data
                              that will be transmitted by the SPI slave.
@@ -1380,7 +1380,7 @@ void MSS_SPI_set_slave_block_buffers
  @param cmd_size
     The cmd_size parameter specifies the number of bytes that must be received
     before the command handler function specified by cmd_handler is called.
-  
+
   The example below demonstrates how to configure SPI1 to implement the protocol
   given as example in the diagram above.
   The configure_slave() function configures SPI1. It sets the receive and transmit
@@ -1392,15 +1392,15 @@ void MSS_SPI_set_slave_block_buffers
   after the 3 command bytes have been received.
   The spi1_block_rx_handler() function will be called by the driver at time t4
   when the transaction completes when the slave select signal becomes de-asserted.
-  
+
   @code
     #define COMMAND_SIZE            3
     #define NB_OF_DUMMY_BYTES       4
     #define MAX_TRANSACTION_SIZE    16
-    
+
     uint8_t slave_tx_buffer[COMMAND_SIZE + NB_OF_DUMMY_BYTES];
     uint8_t slave_rx_buffer[MAX_TRANSACTION_SIZE];
-    
+
     void configure_slave(void)
     {
         MSS_SPI_init( &g_mss_spi1 );
@@ -1411,7 +1411,7 @@ void MSS_SPI_set_slave_block_buffers
             MSS_SPI_MODE1,
             MSS_SPI_BLOCK_TRANSFER_FRAME_SIZE
           );
-      
+
         MSS_SPI_set_slave_block_buffers
             (
                 &g_mss_spi1,
@@ -1421,16 +1421,16 @@ void MSS_SPI_set_slave_block_buffers
                 sizeof(slave_rx_buffer),
                 spi1_block_rx_handler
             );
-            
-        
+
+
         MSS_SPI_set_cmd_handler
             (
                 &g_mss_spi1,
                 spi1_slave_cmd_handler,
                 COMMAND_SIZE
             );
-    }   
-    
+    }
+
     void spi1_slave_cmd_handler
     (
         uint8_t * rx_buff,
@@ -1440,16 +1440,16 @@ void MSS_SPI_set_slave_block_buffers
         uint8_t command;
         uint8_t address;
         uint8_t size;
-        
+
         uint8_t * p_response;
         uint32_t response_size;
-        
+
         command = rx_buff[0];
         address = rx_buff[1];
         size = rx_buff[2];
-        
+
         p_response = get_response_data(command, address, size, &response_size);
-        
+
         MSS_SPI_set_cmd_response(&g_mss_spi1, p_response, response_size);
     }
 
@@ -1460,7 +1460,7 @@ void MSS_SPI_set_slave_block_buffers
     )
     {
         process_rx_data(rx_buff, rx_size);
-    }    
+    }
   @endcode
  */
 void MSS_SPI_set_cmd_handler
@@ -1473,9 +1473,9 @@ void MSS_SPI_set_cmd_handler
 /***************************************************************************//**
  The MSS_SPI_set_cmd_response() function specifies the data that will be
  returned to the master, when a command has been received by the slave. This
- function is called as part of the MSS_SPI_set_cmd_handler(). 
+ function is called as part of the MSS_SPI_set_cmd_handler().
  See the description of MSS_SPI_set_cmd_handler() for more details.
- 
+
   @param this_spi
     The this_spi parameter is a pointer to an mss_spi_instance_t structure
     identifying the MSS SPI hardware block used. There are two such data
@@ -1487,7 +1487,7 @@ void MSS_SPI_set_cmd_handler
     The resp_tx_buffer parameter is a pointer to the buffer containing the data
     that must be returned to the host in the data phase of a SPI command oriented
     transaction.
-  
+
   @param resp_buff_size
     The resp_buff_size parameter specifies the size of the buffer pointed to by
     the resp_tx_buffer parameter.

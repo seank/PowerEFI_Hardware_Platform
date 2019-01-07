@@ -1,20 +1,20 @@
 /*******************************************************************************
  * (c) Copyright 2009-2015 Microsemi SoC Products Group.  All rights reserved.
- * 
- * SmartFusion2 microcontroller subsystem I2C bare metal software driver 
+ *
+ * SmartFusion2 microcontroller subsystem I2C bare metal software driver
  * implementation.
- * 
+ *
  * SVN $Revision: 7795 $
  * SVN $Date: 2015-09-14 17:07:12 +0530 (Mon, 14 Sep 2015) $
  */
 #include "mss_i2c.h"
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 
 #include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*------------------------------------------------------------------------------
  * I2C transaction direction.
@@ -99,9 +99,9 @@ void I2C1_IRQHandler( void );
 #endif
 
 /*------------------------------------------------------------------------------
- * 
+ *
  *------------------------------------------------------------------------------
- * 
+ *
  */
 mss_i2c_instance_t g_mss_i2c0;
 mss_i2c_instance_t g_mss_i2c1;
@@ -119,9 +119,9 @@ void MSS_I2C_init
 {
     uint32_t primask;
     uint_fast16_t clock_speed = (uint_fast16_t)ser_clock_speed;
-    
+
     ASSERT( (this_i2c == &g_mss_i2c0) || (this_i2c == &g_mss_i2c1) );
-    
+
     /*
      * Initialize all items of the this_i2c data structure to zero. This
      * initializes all state variables to their init value. It relies on
@@ -130,13 +130,13 @@ void MSS_I2C_init
      */
     primask = disable_interrupts();
     memset(this_i2c, 0, sizeof(mss_i2c_instance_t));
-    
+
     if ( this_i2c == &g_mss_i2c0 )
     {
         this_i2c->irqn = I2C0_IRQn;
         this_i2c->hw_reg = I2C0;
         this_i2c->hw_reg_bit = I2C0_BITBAND;
-        
+
         /* reset I2C0 */
         SYSREG->SOFT_RST_CR |= SYSREG_I2C0_SOFTRESET_MASK;
         /* Clear any previously pended I2C0 interrupt */
@@ -149,7 +149,7 @@ void MSS_I2C_init
         this_i2c->irqn = I2C1_IRQn;
         this_i2c->hw_reg = I2C1;
         this_i2c->hw_reg_bit = I2C1_BITBAND;
-        
+
         /* reset I2C1 */
         SYSREG->SOFT_RST_CR |= SYSREG_I2C1_SOFTRESET_MASK;
         /* Clear any previously pended I2C1 interrupt */
@@ -157,7 +157,7 @@ void MSS_I2C_init
         /* Take I2C1 out of reset. */
         SYSREG->SOFT_RST_CR &= ~SYSREG_I2C1_SOFTRESET_MASK;
     }
-    
+
     /* Use same base address for SMBus bitband access */
     this_i2c->hw_smb_reg_bit = (I2C_SMBus_BitBand_TypeDef *)this_i2c->hw_reg_bit;
 
@@ -261,7 +261,7 @@ void MSS_I2C_read
     ASSERT((this_i2c == &g_mss_i2c0) || (this_i2c == &g_mss_i2c1));
 
     primask = disable_interrupts();
-    
+
     /* Update the transaction only when there is no transaction going on I2C */
     if( this_i2c->transaction == NO_TRANSACTION)
     {
@@ -279,7 +279,7 @@ void MSS_I2C_read
     this_i2c->master_rx_buffer = read_buffer;
     this_i2c->master_rx_size = read_size;
     this_i2c->master_rx_idx = 0u;
-    
+
     /* Set I2C status in progress */
     this_i2c->master_status = MSS_I2C_IN_PROGRESS;
     this_i2c->options = options;
@@ -305,7 +305,7 @@ void MSS_I2C_read
         stat_ctrl = stat_ctrl;  /* Avoids Lint warning */
         NVIC_ClearPendingIRQ( this_i2c->irqn );
     }
-    
+
     /* Enable the interrupt. ( Re-enable) */
     NVIC_EnableIRQ( this_i2c->irqn );
     restore_interrupts( primask );
@@ -421,9 +421,9 @@ mss_i2c_status_t MSS_I2C_wait_complete
 )
 {
 	mss_i2c_status_t i2c_status;
-    
+
     ASSERT( (this_i2c == &g_mss_i2c0) || (this_i2c == &g_mss_i2c1) );
-    
+
     this_i2c->master_timeout_ms = timeout_ms;
 
     /* Run the loop until state returns I2C_FAILED  or I2C_SUCESS*/
@@ -458,7 +458,7 @@ void MSS_I2C_system_tick
             this_i2c->master_status = MSS_I2C_TIMED_OUT;
             this_i2c->transaction = NO_TRANSACTION;
             this_i2c->is_transaction_pending = 0;
-            
+
             /*
              * Make sure we do not incorrectly signal a timeout for subsequent
              * transactions.
@@ -480,15 +480,15 @@ void MSS_I2C_set_slave_tx_buffer
 )
 {
     uint32_t primask;
-    
+
     ASSERT( (this_i2c == &g_mss_i2c0) || (this_i2c == &g_mss_i2c1) );
 
     primask = disable_interrupts();
-    
+
     this_i2c->slave_tx_buffer = tx_buffer;
     this_i2c->slave_tx_size = tx_size;
     this_i2c->slave_tx_idx = 0u;
-    
+
     restore_interrupts( primask );
 }
 
@@ -508,7 +508,7 @@ void MSS_I2C_set_slave_rx_buffer
     ASSERT( (this_i2c == &g_mss_i2c0) || (this_i2c == &g_mss_i2c1) );
 
     primask = disable_interrupts();
-    
+
     this_i2c->slave_rx_buffer = rx_buffer;
     this_i2c->slave_rx_size = rx_size;
     this_i2c->slave_rx_idx = 0u;
@@ -528,7 +528,7 @@ void MSS_I2C_set_slave_mem_offset_length
 {
     ASSERT( (this_i2c == &g_mss_i2c0) || (this_i2c == &g_mss_i2c1) );
     ASSERT(offset_length <= MAX_OFFSET_LENGTH);
-    
+
     if(offset_length > MAX_OFFSET_LENGTH)
     {
         this_i2c->slave_mem_offset_length = MAX_OFFSET_LENGTH;
@@ -571,7 +571,7 @@ void MSS_I2C_enable_slave
 
     /* Set the assert acknowledge bit. */
     this_i2c->hw_reg_bit->CTRL_AA = 0x01u;
-    
+
     /* Enable slave */
     this_i2c->is_slave_enabled = 1u;
 
@@ -606,7 +606,7 @@ void MSS_I2C_disable_slave
 }
 
 /*------------------------------------------------------------------------------
- * 
+ *
  */
 static void enable_slave_if_required
 (
@@ -623,7 +623,7 @@ static void enable_slave_if_required
  * MSS I2C interrupt service routine.
  *------------------------------------------------------------------------------
  * Parameters:
- * 
+ *
  * mss_i2c_instance_t * this_i2c:
  * Pointer to the mss_i2c_instance_t data structure holding all data related to
  * the MSS I2C instance that generated the interrupt.
@@ -644,7 +644,7 @@ static void mss_i2c_isr
     switch( status )
     {
         /************** MASTER TRANSMITTER / RECEIVER *******************/
-      
+
         case ST_START: /* start has been xmt'd */
         case ST_RESTART: /* repeated start has been xmt'd */
             this_i2c->hw_reg_bit->CTRL_STA = 0u;
@@ -658,11 +658,11 @@ static void mss_i2c_isr
             {
                 this_i2c->master_rx_idx = 0u;
             }
-            
+
             /*
-             * Clear the pending transaction. This condition will be true if the slave 
-             * has acquired the bus to carry out pending master transaction which 
-             * it had received during its slave transmission or reception mode. 
+             * Clear the pending transaction. This condition will be true if the slave
+             * has acquired the bus to carry out pending master transaction which
+             * it had received during its slave transmission or reception mode.
              */
             if(this_i2c->is_transaction_pending)
             {
@@ -678,12 +678,12 @@ static void mss_i2c_isr
                 this_i2c->transaction = this_i2c->pending_transaction;
             }
             break;
-            
+
         case ST_LOST_ARB:
             /* Set start bit.  Let's keep trying!  Don't give up! */
             this_i2c->hw_reg_bit->CTRL_STA = 0x01u;
             break;
-            
+
         /******************* MASTER TRANSMITTER *************************/
         case ST_SLAW_NACK:
             /* SLA+W has been transmitted; not ACK has been received - let's stop. */
@@ -692,12 +692,12 @@ static void mss_i2c_isr
             this_i2c->transaction = NO_TRANSACTION;
             enable_slave_if_required(this_i2c);
             break;
-            
+
         case ST_SLAW_ACK:
         case ST_TX_DATA_ACK:
             /* data byte has been xmt'd with ACK, time to send stop bit or repeated start. */
             if (this_i2c->master_tx_idx < this_i2c->master_tx_size)
-            {    
+            {
                 this_i2c->hw_reg->DATA = this_i2c->master_tx_buffer[this_i2c->master_tx_idx++];
             }
             else if ( this_i2c->transaction == MASTER_RANDOM_READ_TRANSACTION )
@@ -719,7 +719,7 @@ static void mss_i2c_isr
                 /* Store the information of current I2C bus status in the bus_status*/
                 this_i2c->bus_status  = hold_bus;
                 if ( hold_bus == 0u )
-                { 
+                {
                     this_i2c->hw_reg_bit->CTRL_STO = 0x01u; /*xmt stop condition */
                     enable_slave_if_required(this_i2c);
                 }
@@ -734,8 +734,8 @@ static void mss_i2c_isr
 
           case ST_TX_DATA_NACK:
             /* data byte SENT, ACK to be received
-             * In fact, this means we've received a NACK (This may not be 
-             * obvious, but if we've rec'd an ACK then we would be in state 
+             * In fact, this means we've received a NACK (This may not be
+             * obvious, but if we've rec'd an ACK then we would be in state
              * 0x28!) hence, let's send a stop bit
              */
             this_i2c->hw_reg_bit->CTRL_STO = 0x01u;
@@ -749,9 +749,9 @@ static void mss_i2c_isr
             enable_slave_if_required(this_i2c);
 
             break;
-              
+
       /********************* MASTER (or slave?) RECEIVER *************************/
-      
+
       /* STATUS codes 08H, 10H, 38H are all covered in MTX mode */
         case ST_SLAR_ACK: /* SLA+R tx'ed. */
             /* Let's make sure we ACK the first data byte received (set AA bit in CTRL) unless
@@ -773,7 +773,7 @@ static void mss_i2c_isr
                 this_i2c->transaction = NO_TRANSACTION;
             }
             break;
-            
+
         case ST_SLAR_NACK: /* SLA+R tx'ed; let's release the bus (send a stop condition) */
             this_i2c->hw_reg_bit->CTRL_STO = 0x01u;
             this_i2c->master_status = MSS_I2C_FAILED;
@@ -785,7 +785,7 @@ static void mss_i2c_isr
             this_i2c->transaction = NO_TRANSACTION;
             enable_slave_if_required(this_i2c);
             break;
-          
+
         case ST_RX_DATA_ACK: /* Data byte received, ACK returned */
             /* First, get the data */
             this_i2c->master_rx_buffer[this_i2c->master_rx_idx++] = this_i2c->hw_reg->DATA;
@@ -797,17 +797,17 @@ static void mss_i2c_isr
                 this_i2c->hw_reg_bit->CTRL_AA = 0u;
             }
             break;
-            
+
         case ST_RX_DATA_NACK: /* Data byte received, NACK returned */
             /* Get the data, then send a stop condition */
             this_i2c->master_rx_buffer[this_i2c->master_rx_idx] = this_i2c->hw_reg->DATA;
-          
-            hold_bus = this_i2c->options &  MSS_I2C_HOLD_BUS; 
+
+            hold_bus = this_i2c->options &  MSS_I2C_HOLD_BUS;
 
             /* Store the information of current I2C bus status in the bus_status*/
             this_i2c->bus_status  = hold_bus;
             if ( hold_bus == 0u )
-            { 
+            {
                 this_i2c->hw_reg_bit->CTRL_STO = 0x01u;  /*xmt stop condition */
 
                 /* Bus is released, now we can start listening to bus, if it is slave */
@@ -826,22 +826,22 @@ static void mss_i2c_isr
             this_i2c->transaction = NO_TRANSACTION;
             this_i2c->master_status = MSS_I2C_SUCCESS;
             break;
-        
+
         /******************** SLAVE RECEIVER **************************/
         case ST_GCA_NACK: /* NACK after, GCA addressing */
         case ST_SLA_NACK: /* Re-enable AA (assert ack) bit for future transmissions */
             this_i2c->hw_reg_bit->CTRL_AA = 0x01u;
-            
+
             this_i2c->transaction = NO_TRANSACTION;
             this_i2c->slave_status = MSS_I2C_SUCCESS;
-            
+
             /* Check if transaction was pending. If yes, set the START bit */
             if(this_i2c->is_transaction_pending)
             {
                 this_i2c->hw_reg_bit->CTRL_STA = 1u ;
             }
             break;
-            
+
         case ST_GCA_LA: /* Arbitr. lost (GCA rec'd) */
         case ST_SLV_LA: /* Arbitr. lost (SLA rec'd) */
             /*
@@ -874,7 +874,7 @@ static void mss_i2c_isr
             /* Only break from this case if the slave address must NOT be included at the
              * beginning of the received write data. */
             break;
-#endif            
+#endif
         case ST_GCA_ACK: /* DATA received; ACK sent after GCA */
         case ST_RDATA: /* DATA received; must clear DATA register */
             if((this_i2c->slave_rx_buffer != (uint8_t *)0)
@@ -882,7 +882,7 @@ static void mss_i2c_isr
             {
                 data = this_i2c->hw_reg->DATA;
                 this_i2c->slave_rx_buffer[this_i2c->slave_rx_idx++] = data;
-                
+
 #ifdef MSS_I2C_INCLUDE_SLA_IN_RX_PAYLOAD
                 if((ST_RDATA == status) || (ST_GCA_ACK == status))
                 {
@@ -895,13 +895,13 @@ static void mss_i2c_isr
                 }
 #endif
             }
-            
+
             if (this_i2c->slave_rx_idx >= this_i2c->slave_rx_size)
             {
                 this_i2c->hw_reg_bit->CTRL_AA = 0u;   /* send a NACK when done (next reception) */
             }
             break;
-            
+
         case ST_RSTOP:
             /* STOP or repeated START occurred. */
             /* We cannot be sure if the transaction has actually completed as
@@ -975,7 +975,7 @@ static void mss_i2c_isr
              */
             this_i2c->transaction = NO_TRANSACTION;
             break;
-            
+
         case ST_SLV_RST: /* SMBUS ONLY: timeout state. must clear interrupt */
             /*
              * Set the transaction back to NO_TRANSACTION to allow user to do further
@@ -998,7 +998,7 @@ static void mss_i2c_isr
             enable_slave_if_required(this_i2c); /* Make sure AA is set correctly */
 
             break;
-            
+
         /****************** SLAVE TRANSMITTER **************************/
         case ST_SLAVE_SLAR_ACK: /* SLA+R received, ACK returned */
         case ST_SLARW_LA:   /* Arbitration lost, SLA+R received, ACK returned */
@@ -1039,7 +1039,7 @@ static void mss_i2c_isr
                 this_i2c->slave_tx_idx = 0u;
             }
             break;
-        
+
         case ST_SLAVE_RNACK:    /* Data byte has been transmitted; not-ACK has been received. */
         case ST_FINAL: /* Last Data byte tx'ed, ACK received */
             /* We assume that the transaction will be stopped by the master.
@@ -1098,13 +1098,13 @@ static void mss_i2c_isr
 
             break;
     }
-    
+
     if ( clear_irq )
     {
         /* clear interrupt. */
         this_i2c->hw_reg_bit->CTRL_SI = 0u;
     }
-    
+
     /* Read the status register to ensure the last I2C registers write took place
      * in a system built around a bus making use of posted writes. */
     status = this_i2c->hw_reg->STATUS;

@@ -10,7 +10,7 @@
  * implements core interface function for the logical layer to control the
  * MSS USB core in USB Host mode.
  *
- * V2.4 Naming convention change, other cosmetic changes.   
+ * V2.4 Naming convention change, other cosmetic changes.
  * V2.4 Removed unused functions.
  * SVN $Revision: 7515 $
  * SVN $Date: 2015-07-02 14:47:49 +0530 (Thu, 02 Jul 2015) $
@@ -22,8 +22,8 @@
 #include "mss_usb_common_cif.h"
 #include "mss_usb_common_reg_io.h"
 #include "mss_usb_host_reg_io.h"
-#include "../../CMSIS/m2sxxx.h"
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/m2sxxx.h"
+#include "CMSIS/mss_assert.h"
 
 #ifdef __cplusplus
 extern "C" {

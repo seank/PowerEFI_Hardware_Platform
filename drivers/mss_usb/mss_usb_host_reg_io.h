@@ -10,7 +10,7 @@
  *  read / write operations in USB Host mode.
  *
  * V2.4 Fixed the bug with INTERVAL register.
- * V2.4 Naming convention change, other cosmetic changes. 
+ * V2.4 Naming convention change, other cosmetic changes.
  * SVN $Revision: 7515 $
  * SVN $Date: 2015-07-02 14:47:49 +0530 (Thu, 02 Jul 2015) $
  */
@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-#include "../../CMSIS/m2sxxx.h"
+#include "CMSIS/m2sxxx.h"
 #include "mss_usb_core_regs.h"
 
 /*******************************************************************************
@@ -850,7 +850,7 @@ MSS_USBH_CIF_rx_ep_set_reqpkt_count
 {
     /*
     Used with AUTOREQ option.
-    Multiple packets combined into a single bulk  packet within the FIFO count 
+    Multiple packets combined into a single bulk  packet within the FIFO count
     as one packet.
     */
     USB->RQ_PKT_CNT[ep_num] = count;
@@ -866,7 +866,7 @@ MSS_USBH_CIF_rx_ep_set_target_func_addr
     uint32_t addr
 )
 {
-    /*Device number of the target - initially zero, then determined by 
+    /*Device number of the target - initially zero, then determined by
     enumeration process.*/
     USB->TAR[ep_num].RX_FUNC_ADDR = (addr & 0x7Fu);
 }
@@ -882,9 +882,9 @@ MSS_USBH_CIF_tx_ep_set_target_hub_addr
     uint32_t mtt
 )
 {
-    /*Device number of the target - initially zero, then determined by 
+    /*Device number of the target - initially zero, then determined by
       enumeration process.*/
-    USB->TAR[ep_num].TX_HUB_ADDR = ((uint8_t)(mtt << TARGET_DEVICE_HUB_MT_SHIFT) | 
+    USB->TAR[ep_num].TX_HUB_ADDR = ((uint8_t)(mtt << TARGET_DEVICE_HUB_MT_SHIFT) |
                                     (addr & 0x7Fu));
 }
 
@@ -899,9 +899,9 @@ MSS_USBH_CIF_rx_ep_set_target_hub_addr
     uint32_t mtt
 )
 {
-    /*Device number of the target - initially zero, then determined by 
+    /*Device number of the target - initially zero, then determined by
       enumeration process.*/
-    USB->TAR[ep_num].RX_HUB_ADDR = ((uint8_t)(mtt << TARGET_DEVICE_HUB_MT_SHIFT) | 
+    USB->TAR[ep_num].RX_HUB_ADDR = ((uint8_t)(mtt << TARGET_DEVICE_HUB_MT_SHIFT) |
                                     (addr & 0x7Fu));
 }
 

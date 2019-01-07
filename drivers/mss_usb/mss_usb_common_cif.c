@@ -13,7 +13,7 @@
  * V2.4 Separated host and device mode interrupt handling. Changes are made
  *      to make sure that this file is minimal common code between two modes
  *      so that testing effort is reduced.
- * V2.4 MSS_USB_CIF_rx_ep_read_prepare and MSS_USB_CIF_ep_write_pkt parameter 
+ * V2.4 MSS_USB_CIF_rx_ep_read_prepare and MSS_USB_CIF_ep_write_pkt parameter
  * change to avoid using upper layer endpoint structure.
  * V2.4 Naming convention change, other cosmetic changes.
  * V2.3 Fixing Dual role mode conditions check
@@ -26,7 +26,7 @@
 #include "mss_usb_common_cif.h"
 #include "mss_usb_core_regs.h"
 #include "mss_usb_common_reg_io.h"
-#include "../../CMSIS/mss_assert.h"
+#include "CMSIS/mss_assert.h"
 
 #ifdef MSS_USB_HOST_ENABLED
 #include "mss_usb_host_cif.h"
