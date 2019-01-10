@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81be4a38_3b9037e3",
+        "filename": "build_info/BUILD",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1013315
+      },
+      "writtenOn": "2019-01-10T17:07:52Z",
+      "side": 1,
+      "message": "Dave/Mike, WDYT? Seems pretty bad IMO \n\nhttps://docs.bazel.build/versions/master/skylark/rules.html  ?",
+      "range": {
+        "startLine": 15,
+        "startChar": 2,
+        "endLine": 15,
+        "endChar": 5
+      },
+      "revId": "ae218b2df699fafe6da25bdf618ef559640d59f7",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
